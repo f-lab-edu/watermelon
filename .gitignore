@@ -1,0 +1,6 @@
+/src/main/resources/application.properties
+.gradle/
+.DS_Store
+
+# IntelliJ IDEA files
+.idea/
