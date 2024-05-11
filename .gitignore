@@ -1,4 +1,5 @@
 /src/main/resources/application.properties
+/build/
 .gradle/
 .DS_Store
 
