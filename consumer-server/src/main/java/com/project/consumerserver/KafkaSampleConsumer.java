@@ -1,4 +1,4 @@
-package com.project.watermelon;
+package com.project.consumerserver;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;

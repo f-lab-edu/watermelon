@@ -12,12 +12,6 @@ public class RedisUtil {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-// @Autowired -> @RequiredArgsConstructor
-//    @Autowired
-//    public RedisUtil(RedisTemplate<String, Object> redisTemplate) {
-//        this.redisTemplate = redisTemplate;
-//    }
-
     public void saveMessage(String messageId, Object message) {
         redisTemplate.opsForValue().set(messageId, message);
     }

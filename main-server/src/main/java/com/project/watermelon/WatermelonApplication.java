@@ -1,29 +1,20 @@
 package com.project.watermelon;
 
 import com.project.watermelon.util.RedisUtil;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
 @EnableJpaAuditing
 @SpringBootApplication
 public class WatermelonApplication {
-
 	public static void main(String[] args) {
-//		SpringApplication.run(WatermelonApplication.class, args);
-
-		ApplicationContext ctx = SpringApplication.run(WatermelonApplication.class, args);
-		RedisUtil redisUtil = ctx.getBean(RedisUtil.class);
-
-		// 예제: 메시지 저장 및 검색 테스트
-		String messageId = "uniqueMessageId";
-		String messageDetails = "This is a test message.";
-		redisUtil.saveMessage(messageId, messageDetails);
-
-		// 메시지 검색
-		Object retrievedMessage = redisUtil.getMessage(messageId);
-		System.out.println("Retrieved Message: " + retrievedMessage);
+		SpringApplication.run(WatermelonApplication.class, args);
 	}
-
 }
