@@ -1,5 +1,12 @@
-/src/main/resources/application.properties
-/build/
+main-server/src/main/resources/application.properties
+main-server/build/
+
+consumer-server/src/main/resources/application.properties
+consumer-server/build/
+consumer-server/gradlew
+consumer-server/gradlew.bat
+
+/build
 .gradle/
 .DS_Store
 
