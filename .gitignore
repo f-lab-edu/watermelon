@@ -1,8 +1,10 @@
 main-server/src/main/resources/application.properties
 main-server/build/
+main-server/out/
 
 consumer-server/src/main/resources/application.properties
 consumer-server/build/
+consumer-server/out/
 consumer-server/gradlew
 consumer-server/gradlew.bat
 
