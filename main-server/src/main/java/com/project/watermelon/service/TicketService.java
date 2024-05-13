@@ -14,9 +14,9 @@ public class TicketService {
         TicketPublishAvailabilityResponseDto responseDto = new TicketPublishAvailabilityResponseDto();
         TicketPublishAvailability ticketPublishAvailability = new TicketPublishAvailability();
 
-        boolean availability = ticketRedisRepository.checkTicketPublishAvailability();
+        boolean countAvailability = ticketRedisRepository.checkTicketPublishCountAvailability();
 
-        ticketPublishAvailability.setAvailability(availability);
+        ticketPublishAvailability.setAvailability(countAvailability);
         responseDto.setData(ticketPublishAvailability);
 
         return responseDto;

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 public class TicketRedisRepository {
     private final StringRedisTemplate stringRedisTemplate;
 
-    public Boolean checkTicketPublishAvailability() {
+    public Boolean checkTicketPublishCountAvailability() {
         ValueOperations<String, String> ops = stringRedisTemplate.opsForValue();
         String maxAvailableProgressCountKey = "maxAvailableProgressCount";
         String currentProgressCountKey = "currentProgressCount";
