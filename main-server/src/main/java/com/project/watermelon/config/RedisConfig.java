@@ -18,6 +18,7 @@ import jakarta.annotation.PostConstruct;
 public class RedisConfig {
 
     private final StringRedisTemplate stringRedisTemplate;
+
     @Value("${redis.maxAvailableProgressCount}")
     private String maxAvailableProgressCount;
 
