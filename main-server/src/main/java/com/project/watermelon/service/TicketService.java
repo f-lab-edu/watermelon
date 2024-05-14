@@ -33,6 +33,7 @@ public class TicketService {
         TicketPublishAvailability ticketPublishAvailability = new TicketPublishAvailability();
 
         // count 가용성
+        // 동적으로 제어하면서 레디스를 이용하는 방식으로 사용하기.
         boolean countAvailability = ticketRedisRepository.checkTicketPublishCountAvailability();
 
         ticketPublishAvailability.setAvailability(countAvailability);

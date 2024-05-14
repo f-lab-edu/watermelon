@@ -26,7 +26,9 @@ public class KafkaConsumerService {
             for (ConsumerRecord<String, String> record : records) {
                 System.out.printf("Received message: (key: %s, value: %s, partition: %d, offset: %d)%n",
                         record.key(), record.value(), record.partition(), record.offset());
-                if (record.offset() >= 264) {
+                // 임시코드는 PR로 올릴 필요 없음 / 샘플 코드 정리!
+                // 카프카 리스너 (어노테이션)
+                if (record.offset() >= 400) {
                     Thread.sleep(500);
                     kafkaConsumer.seek(new TopicPartition(record.topic(), record.partition()), record.offset());
                     break;
