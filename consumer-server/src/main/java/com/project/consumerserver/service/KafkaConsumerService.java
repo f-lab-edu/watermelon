@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -42,5 +44,28 @@ public class KafkaConsumerService {
             Thread.sleep(5000);
         }
     }
-}
 
+    @KafkaListener(topics = "test", groupId = "test-group")
+    public void listen(String message, Acknowledgment acknowledgment, ConsumerRecord<String, String> record) {
+        long offset = record.offset();
+        System.out.println("Received message: " + message + "offset: " + Long.toString(offset));
+        // 메시지 처리 로직
+        try {
+            boolean isProcessComplete = processMessage(offset, message);
+            if (isProcessComplete) {
+                acknowledgment.acknowledge(); // 성공적으로 메시지를 처리한 후 수동으로 커밋
+            }
+            else {
+                System.out.println("message was not committed");
+            }
+        } catch (Exception e) {
+            System.err.println("Error processing message: " + message);
+            // 예외 처리 로직, 필요한 경우 재처리 로직 구현
+        }
+    }
+
+    private boolean processMessage(Long offset, String message) {
+        System.out.println("message processing complete" + message);
+        return offset <= 293;
+    }
+}
