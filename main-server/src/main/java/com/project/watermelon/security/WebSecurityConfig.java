@@ -47,10 +47,10 @@ public class WebSecurityConfig {
 
 //                        .requestMatchers("/**").permitAll() // for local debug
 
-                        .requestMatchers("/member/**").permitAll()
+                        .requestMatchers("/members/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts").permitAll()
-                        .requestMatchers("/api/availability").hasAnyAuthority(MemberRole.Authority.MEMBER)
-                        .anyRequest().hasAuthority(MemberRole.Authority.QUALIFIED_MEMBER))
+                        .requestMatchers("/api/availability").hasAnyAuthority(MemberRole.MEMBER.getAuthority())
+                        .anyRequest().hasAuthority(MemberRole.QUALIFIED_MEMBER.getAuthority()))
 
                 .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();

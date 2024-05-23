@@ -22,6 +22,6 @@ public class MemberSignUpResponseDto {
     }
 
     public static MemberSignUpResponseDto of(String status, String message) {
-        return new MemberSignUpResponseDto("error",status, message);
+        return new MemberSignUpResponseDto("",status, message);
     }
 }
