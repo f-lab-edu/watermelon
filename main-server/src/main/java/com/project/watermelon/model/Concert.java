@@ -1,5 +1,6 @@
 package com.project.watermelon.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.project.watermelon.util.Timestamped;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -8,6 +9,8 @@ import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @NoArgsConstructor
 @Getter
@@ -24,14 +27,7 @@ public class Concert extends Timestamped {
     @Column(nullable = false)
     private String genre;
 
-    @Column(nullable = false)
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    private LocalDateTime performanceDate;
-
-    @Column(nullable = false)
-    private String startTime;
-
-    @Column(nullable = false)
-    private String endTime;
+    @OneToMany(mappedBy = "concert")
+    private List<ConcertMapping> concertMappingList = new ArrayList<>();
 }
 

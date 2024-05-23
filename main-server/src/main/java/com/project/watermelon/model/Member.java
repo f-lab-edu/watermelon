@@ -6,6 +6,9 @@ import com.project.watermelon.util.Timestamped;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @NoArgsConstructor
 @Getter
@@ -30,6 +33,9 @@ public class Member extends Timestamped {
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
     private MemberRole memberRole = MemberRole.MEMBER;
+
+    @OneToMany(mappedBy = "member")
+    private List<Purchase> purchaseList = new ArrayList<>();
 
     @Builder
     public Member(String memberName, String password, MemberRole memberRole, String email) {

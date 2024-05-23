@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@Table(name = "refresh_token")
+@Table(name = "REFRESH_TOKEN")
 @Entity
 public class RefreshToken extends Timestamped {
 

@@ -16,6 +16,9 @@ public class Ticket extends Timestamped {
     private Long ticketId;
 
     @ManyToOne
-    @JoinColumn(name = "concertId")
-    private Concert concert;
+    @JoinColumn(name = "concertMappingId", nullable = false)
+    private ConcertMapping concertMapping;
+
+    @OneToOne(mappedBy = "ticket")
+    private Purchase purchase;
 }

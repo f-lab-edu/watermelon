@@ -25,12 +25,11 @@ public class CustomPhysicalNamingStrategy extends PhysicalNamingStrategyStandard
         if (input == null) return null;
         StringBuilder result = new StringBuilder();
         char[] chars = input.toCharArray();
-        result.append(chars[0]);
-        for (int i = 1; i < chars.length; i++) {
-            if (Character.isUpperCase(chars[i])) {
-                result.append('_').append(chars[i]);
+        for (char c : chars) {
+            if (Character.isUpperCase(c)) {
+                result.append('_').append(c);
             } else {
-                result.append(chars[i]);
+                result.append(c);
             }
         }
         return result.toString();
