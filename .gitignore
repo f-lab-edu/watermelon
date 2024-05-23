@@ -14,3 +14,4 @@ consumer-server/gradlew.bat
 
 # IntelliJ IDEA files
 .idea/
+seat_data.json
