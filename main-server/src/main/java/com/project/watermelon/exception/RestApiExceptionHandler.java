@@ -13,25 +13,25 @@ public class RestApiExceptionHandler {
 
     @ExceptionHandler(value = { IllegalArgumentException.class})
     public ResponseEntity<Object> handleApiRequestException(IllegalArgumentException ex) {
-        RestApiException restApiException = new RestApiException();
+        RestApiExceptionInfo restApiExceptionInfo = new RestApiExceptionInfo();
 
         ErrorCode errorCode = ErrorCode.ILLEGAL_ARGUMENT_EXCEPTION;
 
-        restApiException.setHttpStatus(errorCode.getHttpStatus());
-        restApiException.setErrorMessage(ex.getMessage());
+        restApiExceptionInfo.setHttpStatus(errorCode.getHttpStatus());
+        restApiExceptionInfo.setErrorMessage(ex.getMessage());
 
-        return new ResponseEntity(restApiException, restApiException.getHttpStatus());
+        return new ResponseEntity(restApiExceptionInfo, restApiExceptionInfo.getHttpStatus());
     }
 
     @ExceptionHandler(value = { NullPointerException.class})
     public ResponseEntity<Object> handleApiRequestException(NullPointerException ex) {
-        RestApiException restApiException = new RestApiException();
+        RestApiExceptionInfo restApiExceptionInfo = new RestApiExceptionInfo();
 
         ErrorCode errorCode = ErrorCode.NULL_POINTER_EXCEPTION;
 
-        restApiException.setHttpStatus(errorCode.getHttpStatus());
-        restApiException.setErrorMessage(ex.getMessage());
+        restApiExceptionInfo.setHttpStatus(errorCode.getHttpStatus());
+        restApiExceptionInfo.setErrorMessage(ex.getMessage());
 
-        return new ResponseEntity(restApiException, restApiException.getHttpStatus());
+        return new ResponseEntity(restApiExceptionInfo, restApiExceptionInfo.getHttpStatus());
     }
 }

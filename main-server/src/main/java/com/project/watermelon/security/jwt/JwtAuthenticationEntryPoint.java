@@ -2,7 +2,7 @@ package com.project.watermelon.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.watermelon.exception.ErrorCode;
-import com.project.watermelon.exception.RestApiException;
+import com.project.watermelon.exception.RestApiExceptionInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.AuthenticationException;
@@ -19,7 +19,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
         // 유효한 자격증명을 제공하지 않고 접근하려 할때 401
-        RestApiException restApiException = new RestApiException();
+        RestApiExceptionInfo restApiException = new RestApiExceptionInfo();
         ErrorCode errorCode = ErrorCode.UNAUTHORIZED_EXCEPTION;
 
         restApiException.setHttpStatus(errorCode.getHttpStatus());
