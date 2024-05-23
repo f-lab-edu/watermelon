@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @Setter
-public class RestApiException {
+public class RestApiExceptionInfo{
 
     private String errorMessage;
     private HttpStatus httpStatus;
