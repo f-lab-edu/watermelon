@@ -3,6 +3,8 @@ package com.project.watermelon.service;
 import com.project.watermelon.dto.model.ReservationMessageResponse;
 import com.project.watermelon.dto.reservation.ReservationMessageResponseDto;
 import com.project.watermelon.exception.MemberAlreadyRequestReservationException;
+import com.project.watermelon.model.ConcertMapping;
+import com.project.watermelon.repository.ConcertMappingRepository;
 import com.project.watermelon.repository.ReservationRedisRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class ReservationService {
     private final ReservationRedisRepository reservationRedisRepository;
     private final KafkaProducer<String, String> kafkaProducer;
     private final StringRedisTemplate stringRedisTemplate;
+    private final ConcertMappingRepository concertMappingRepository;
 
     @Value("${kafka.reservationMessageTopic}")
     private String reservationMessageTopic;
@@ -37,9 +40,14 @@ public class ReservationService {
 
     @Transactional
     public ReservationMessageResponseDto produceReservationMessage(String memberEmail, Long concertMappingId) {
+        ConcertMapping concertMapping = concertMappingRepository.findByConcertMappingId(concertMappingId).orElseThrow(
+                () -> new IllegalArgumentException("concert mapping not exist")
+        );
+        Long locationId = concertMapping.getLocation().getLocationId();
+
         String stringConcertMappingId = Long.toString(concertMappingId);
         HashOperations<String, String, String> hashOps = stringRedisTemplate.opsForHash();
-        String key = "concert:" + stringConcertMappingId + ":memberStatus";
+        String key = "concertMappingId:" + stringConcertMappingId + ":memberStatus";
 
         // 중복 체크
         Boolean isMemberExist = hashOps.hasKey(key, memberEmail);
@@ -53,7 +61,7 @@ public class ReservationService {
             // 트랜잭션 시작
             kafkaProducer.beginTransaction();
 
-            String messageValue = "concertMappingId:" + stringConcertMappingId + "waitingUser:" + memberEmail;
+            String messageValue = "concertMappingId:" + stringConcertMappingId + ":"+ "waitingUser:" + memberEmail + ":" + "locationId:" + locationId;
             ProducerRecord<String, String> record = new ProducerRecord<>(reservationMessageTopic, stringConcertMappingId, messageValue);
             // Future 객체를 통해 send() 결과 확인
             Future<RecordMetadata> sendFuture = kafkaProducer.send(record);

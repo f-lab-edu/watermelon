@@ -1,7 +1,9 @@
 package com.project.consumerserver.config;
 
+import lombok.Getter;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -20,8 +22,15 @@ import java.util.Map;
 
 @Configuration
 @EnableKafka
+@Getter
 public class KafkaConfig {
     private String bootstrapServers = getLocalHostLANAddress().getHostAddress() + ":9092";
+
+    @Value("${kafka.reservationMessageTopic}")
+    private String reservationMessageTopic;
+
+    @Value("${kafka.reservationMessageGroup}")
+    private String reservationMessageGroup;
 
     @Bean
     KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<Integer, String>>

@@ -16,8 +16,8 @@ public class ReservationRedisRepository {
         HashOperations<String, String, String> hashOps = stringRedisTemplate.opsForHash();
         ZSetOperations<String, String> zSetOps = stringRedisTemplate.opsForZSet();
 
-        String hashKey = "concert:" + concertMappingId + ":memberStatus";
-        String zSetKey = "concert:" + concertMappingId + ":members";
+        String hashKey = "concertMappingId:" + concertMappingId + ":memberStatus";
+        String zSetKey = "concertMappingId:" + concertMappingId + ":members";
 
         long currentTimeMillis = System.currentTimeMillis();
 
