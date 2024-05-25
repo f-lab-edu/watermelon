@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class CommonBackendResponseDto<T> {
     private String status = "ok"; // 응답 상태를 나타내는 필드, 예: "ok", "fail"
-    private T data; // 실제 응답 데이터를 포함할 필드
+    private T data = null; // 실제 응답 데이터를 포함할 필드
     private String reason = null; // 실제 응답 데이터를 포함할 필드
 
     // 기본 생성자

@@ -50,6 +50,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/members/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts").permitAll()
                         .requestMatchers("/api/availability").hasAnyAuthority(MemberRole.MEMBER.getAuthority())
+                        .requestMatchers("/reservations/*").hasAnyAuthority(MemberRole.MEMBER.getAuthority())
                         .anyRequest().hasAuthority(MemberRole.QUALIFIED_MEMBER.getAuthority()))
 
                 .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
