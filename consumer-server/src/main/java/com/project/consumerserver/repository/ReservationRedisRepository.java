@@ -16,7 +16,7 @@ public class ReservationRedisRepository {
         HashOperations<String, String, String> hashOps = stringRedisTemplate.opsForHash();
 
         String hashKey = "concertMapping:" + concertMappingId;
-        String field = "seatCapacity";
+        String field = "availableSeatCapacity";
 
         // 상태를 Hash에 저장
         hashOps.put(hashKey, field, Long.toString(seatCapacity));

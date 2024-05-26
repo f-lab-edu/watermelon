@@ -97,16 +97,17 @@ public class KafkaListenerService {
     private Long retrieveSeatCapacity(String stringConcertMappingId, Long locationId) {
         HashOperations<String, String, String> hashOps = stringRedisTemplate.opsForHash();
         String key = "concertMappingId:" + stringConcertMappingId;
-        String hKey = "seatCapacity";
+        String hKey = "availableSeatCapacity";
         String stringSeatCapacity = hashOps.get(key, hKey);
-        Long seatCapacity;
+        Long availableSeatCapacity;
 
         if (stringSeatCapacity != null) {
-            seatCapacity = Long.parseLong(stringSeatCapacity);
+            availableSeatCapacity = Long.parseLong(stringSeatCapacity);
         } else {
-            seatCapacity = locationReader.retrieveLocationSeatCapacity(locationId);
-            reservationRedisRepository.storeConcertMappingSeatCapacity(stringConcertMappingId, seatCapacity);
+            // 처음 가용한 좌석 수를 조회한 상황 -> RDB에서 Location의 SEAT_CAPACITY 조회
+            availableSeatCapacity = locationReader.retrieveLocationSeatCapacity(locationId);
+            reservationRedisRepository.storeConcertMappingSeatCapacity(stringConcertMappingId, availableSeatCapacity);
         }
-        return seatCapacity;
+        return availableSeatCapacity;
     }
 }
