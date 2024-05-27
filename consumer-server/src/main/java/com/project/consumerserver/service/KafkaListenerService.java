@@ -25,8 +25,6 @@ public class KafkaListenerService {
     @KafkaListener(topics = "#{@kafkaConfig.getReservationMessageTopic()}", groupId = "#{@kafkaConfig.getReservationMessageGroup()}")
     public void listen(String message, Acknowledgment acknowledgment, ConsumerRecord<String, String> record) {long offset = record.offset();
         // message = "concertMappingId:1:waitingUser:rlafbf222@naver.com:locationId:1"
-//        acknowledgment.acknowledge();
-
         ReservationMessage reservationMessage = parseReservationMessage(message);
         System.out.println("Received message: " + message + " offset: " + offset + " partition: " + Integer.toString(record.partition()));
 
