@@ -75,6 +75,7 @@ public class KafkaListenerService {
         try {
             String stringConcertMappingId = Long.toString(message.getConcertMappingId());
             Long seatCapacity = retrieveSeatCapacity(stringConcertMappingId, message.getLocationId());
+            // 순번 지정해주는 로직 추가 예정
 
             if (seatCapacity > 0) {
                 // update status: AVAILABLE
