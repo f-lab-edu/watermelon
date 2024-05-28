@@ -41,5 +41,8 @@ public class ConcertMapping extends Timestamped {
 
     @OneToMany(mappedBy = "concertMapping")
     private List<Ticket> ticketList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "concertMapping")
+    private List<Reservation> reservationList = new ArrayList<>();
 }
 

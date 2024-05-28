@@ -4,6 +4,7 @@ import com.project.consumerserver.config.KafkaConfig;
 import com.project.consumerserver.dto.ReservationMessage;
 import com.project.consumerserver.enumeration.ReservationStatus;
 import com.project.consumerserver.repository.LocationReader;
+import com.project.consumerserver.repository.ReservationManager;
 import com.project.consumerserver.repository.ReservationRedisRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -20,6 +21,7 @@ public class KafkaListenerService {
     private final KafkaConfig kafkaConfig;
     private final StringRedisTemplate stringRedisTemplate;
     private final LocationReader locationReader;
+    private final ReservationManager reservationManager;
     private final ReservationRedisRepository reservationRedisRepository;
 
     @KafkaListener(topics = "#{@kafkaConfig.getReservationMessageTopic()}", groupId = "#{@kafkaConfig.getReservationMessageGroup()}")

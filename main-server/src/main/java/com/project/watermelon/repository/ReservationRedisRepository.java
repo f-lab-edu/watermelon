@@ -7,6 +7,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Repository;
 
+import java.util.concurrent.TimeUnit;
+
 @Repository
 @RequiredArgsConstructor
 public class ReservationRedisRepository {
@@ -14,18 +16,14 @@ public class ReservationRedisRepository {
 
     public void storeUserIdWithDefaultState(String memberEmail, String concertMappingId) {
         HashOperations<String, String, String> hashOps = stringRedisTemplate.opsForHash();
-        ZSetOperations<String, String> zSetOps = stringRedisTemplate.opsForZSet();
 
         String hashKey = "concertMappingId:" + concertMappingId + ":memberStatus";
-        String zSetKey = "concertMappingId:" + concertMappingId + ":members";
-
-        long currentTimeMillis = System.currentTimeMillis();
 
         // 상태를 Hash에 저장
         hashOps.put(hashKey, memberEmail, ReservationStatus.WAIT.toString());
 
-        // 순위를 ZSet에 저장 (현재 시간 기준으로)
-        zSetOps.add(zSetKey, memberEmail, (double) currentTimeMillis);
+        // TTL을 10분으로 설정 (10분 = 600초)
+        stringRedisTemplate.expire(hashKey, 10, TimeUnit.MINUTES);
     }
 
 

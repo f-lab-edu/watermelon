@@ -4,8 +4,11 @@ import com.project.watermelon.dto.model.ReservationMessageResponse;
 import com.project.watermelon.dto.reservation.ReservationMessageResponseDto;
 import com.project.watermelon.exception.MemberAlreadyRequestReservationException;
 import com.project.watermelon.model.ConcertMapping;
+import com.project.watermelon.model.Member;
+import com.project.watermelon.model.Reservation;
 import com.project.watermelon.repository.ConcertMappingRepository;
 import com.project.watermelon.repository.ReservationRedisRepository;
+import com.project.watermelon.repository.ReservationRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -14,9 +17,11 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -26,6 +31,7 @@ import java.util.concurrent.TimeoutException;
 @RequiredArgsConstructor
 public class ReservationService {
     private final ReservationRedisRepository reservationRedisRepository;
+    private final ReservationRepository reservationRepository;
     private final KafkaProducer<String, String> kafkaProducer;
     private final StringRedisTemplate stringRedisTemplate;
     private final ConcertMappingRepository concertMappingRepository;
@@ -46,17 +52,12 @@ public class ReservationService {
         Long locationId = concertMapping.getLocation().getLocationId();
 
         String stringConcertMappingId = Long.toString(concertMappingId);
-        HashOperations<String, String, String> hashOps = stringRedisTemplate.opsForHash();
-        String key = "concertMappingId:" + stringConcertMappingId + ":memberStatus";
 
-        // 중복 체크
-        Boolean isMemberExist = hashOps.hasKey(key, memberEmail);
-        if (isMemberExist) {
+        if (isMemberExists(stringConcertMappingId, memberEmail)) {
             String message = "Member " + memberEmail + " is already registered for concert: " + stringConcertMappingId;
             System.out.println(message);
             throw new MemberAlreadyRequestReservationException(message);
         }
-
         try {
             // 트랜잭션 시작
             kafkaProducer.beginTransaction();
@@ -89,9 +90,28 @@ public class ReservationService {
             kafkaProducer.abortTransaction();
             e.printStackTrace();
         }
-
-        Long memberRank = reservationRedisRepository.getUserRank(memberEmail, stringConcertMappingId);
-        ReservationMessageResponse response = new ReservationMessageResponse(memberEmail, memberRank);
+        ReservationMessageResponse response = new ReservationMessageResponse(memberEmail);
         return new ReservationMessageResponseDto(response);
+    }
+
+    private Boolean isMemberExists(String stringConcertMappingId, String memberEmail) {
+        boolean isMemberExists = false;
+        HashOperations<String, String, String> hashOps = stringRedisTemplate.opsForHash();
+        String key = "concertMappingId:" + stringConcertMappingId + ":memberStatus";
+
+        // 중복 체크
+        Boolean isMemberExist = hashOps.hasKey(key, memberEmail);
+
+        if (!isMemberExist) {
+            Optional<Reservation> reservation = reservationRepository.findByMember_Email(memberEmail);
+            if (reservation.isPresent()) {
+                reservationRedisRepository.storeUserIdWithDefaultState(memberEmail, stringConcertMappingId);
+                isMemberExists = true;
+            }
+        }
+        else {
+            isMemberExists = true;
+        }
+        return isMemberExists;
     }
 }
