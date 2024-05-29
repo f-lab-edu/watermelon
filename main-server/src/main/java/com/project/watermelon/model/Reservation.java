@@ -11,13 +11,16 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
+@Table(name = "RESERVATION", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"concertMappingId", "memberId"})
+})
 public class Reservation extends Timestamped {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long reservationId;
 
     @Column(nullable = false)
-    private Long rank;
+    private Long reservationRank;
 
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
@@ -31,4 +34,3 @@ public class Reservation extends Timestamped {
     @JoinColumn(name = "memberId", nullable = false)
     private Member member;
 }
-

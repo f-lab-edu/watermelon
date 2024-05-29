@@ -46,11 +46,6 @@ public class ReservationService {
 
     @Transactional
     public ReservationMessageResponseDto produceReservationMessage(String memberEmail, Long concertMappingId) {
-        ConcertMapping concertMapping = concertMappingRepository.findByConcertMappingId(concertMappingId).orElseThrow(
-                () -> new IllegalArgumentException("concert mapping not exist")
-        );
-        Long locationId = concertMapping.getLocation().getLocationId();
-
         String stringConcertMappingId = Long.toString(concertMappingId);
 
         if (isMemberExists(stringConcertMappingId, memberEmail)) {
@@ -62,7 +57,7 @@ public class ReservationService {
             // 트랜잭션 시작
             kafkaProducer.beginTransaction();
 
-            String messageValue = "concertMappingId:" + stringConcertMappingId + ":"+ "waitingUser:" + memberEmail + ":" + "locationId:" + locationId;
+            String messageValue = "concertMappingId:" + stringConcertMappingId + ":"+ "waitingUser:" + memberEmail;
             ProducerRecord<String, String> record = new ProducerRecord<>(reservationMessageTopic, stringConcertMappingId, messageValue);
             // Future 객체를 통해 send() 결과 확인
             Future<RecordMetadata> sendFuture = kafkaProducer.send(record);

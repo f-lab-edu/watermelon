@@ -10,5 +10,4 @@ import lombok.Setter;
 public class ReservationMessage {
     private Long concertMappingId;
     private String memberEmail;
-    private Long locationId;
 }

@@ -18,7 +18,7 @@ public class KafkaListenerService {
     @KafkaListener(topics = "#{@kafkaConfig.getReservationMessageTopic()}", groupId = "#{@kafkaConfig.getReservationMessageGroup()}")
     public void listen(String message, Acknowledgment acknowledgment, ConsumerRecord<String, String> record) {
         long offset = record.offset();
-        // message = "concertMappingId:1:waitingUser:rlafbf222@naver.com:locationId:1"
+        // message = "concertMappingId:1:waitingUser:rlafbf222@naver.com"
         ReservationMessage reservationMessage = parseReservationMessage(message);
         System.out.println("Received message: " + message + " offset: " + offset + " partition: " + Integer.toString(record.partition()));
 
@@ -38,7 +38,7 @@ public class KafkaListenerService {
     }
 
     private ReservationMessage parseReservationMessage(String message) {
-        // message format: "concertMappingId:1:waitingUser:rlafbf222@naver.com:locationId:1"
+        // message format: "concertMappingId:1:waitingUser:rlafbf222@naver.com"
         String[] parts = message.split("(:)");
         if (parts.length < 2) {
             throw new IllegalArgumentException("Invalid message format: " + message);
@@ -53,15 +53,6 @@ public class KafkaListenerService {
 
         String memberEmail = parts[3];
 
-        Long locationId;
-        try {
-            locationId = Long.parseLong(parts[5]);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid locationId format: " + parts[3]);
-        } catch (IndexOutOfBoundsException e) {
-            throw new IndexOutOfBoundsException("index out of bounds");
-        }
-
-        return new ReservationMessage(concertMappingId, memberEmail, locationId);
+        return new ReservationMessage(concertMappingId, memberEmail);
     }
 }

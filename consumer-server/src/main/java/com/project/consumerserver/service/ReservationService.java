@@ -5,9 +5,9 @@ import com.project.consumerserver.enumeration.ReservationStatus;
 import com.project.consumerserver.repository.MemberRepository;
 import com.project.consumerserver.repository.ReservationRedisRepository;
 import com.project.consumerserver.repository.ReservationRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
