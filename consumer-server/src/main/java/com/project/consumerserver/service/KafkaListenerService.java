@@ -2,14 +2,8 @@ package com.project.consumerserver.service;
 
 import com.project.consumerserver.config.KafkaConfig;
 import com.project.consumerserver.dto.ReservationMessage;
-import com.project.consumerserver.enumeration.ReservationStatus;
-import com.project.consumerserver.repository.LocationReader;
-import com.project.consumerserver.repository.ReservationManager;
-import com.project.consumerserver.repository.ReservationRedisRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
@@ -19,20 +13,18 @@ import org.springframework.stereotype.Service;
 public class KafkaListenerService {
 
     private final KafkaConfig kafkaConfig;
-    private final StringRedisTemplate stringRedisTemplate;
-    private final LocationReader locationReader;
-    private final ReservationManager reservationManager;
-    private final ReservationRedisRepository reservationRedisRepository;
+    private final ReservationService reservationService;
 
     @KafkaListener(topics = "#{@kafkaConfig.getReservationMessageTopic()}", groupId = "#{@kafkaConfig.getReservationMessageGroup()}")
-    public void listen(String message, Acknowledgment acknowledgment, ConsumerRecord<String, String> record) {long offset = record.offset();
+    public void listen(String message, Acknowledgment acknowledgment, ConsumerRecord<String, String> record) {
+        long offset = record.offset();
         // message = "concertMappingId:1:waitingUser:rlafbf222@naver.com:locationId:1"
         ReservationMessage reservationMessage = parseReservationMessage(message);
         System.out.println("Received message: " + message + " offset: " + offset + " partition: " + Integer.toString(record.partition()));
 
         // 메시지 처리 로직
         try {
-            boolean isProcessComplete = processMessage(reservationMessage);
+            boolean isProcessComplete = reservationService.processMessage(reservationMessage);
             if (isProcessComplete) {
                 acknowledgment.acknowledge(); // 성공적으로 메시지를 처리한 후 수동으로 커밋
                 System.out.println("Message was committed");
@@ -71,44 +63,5 @@ public class KafkaListenerService {
         }
 
         return new ReservationMessage(concertMappingId, memberEmail, locationId);
-    }
-
-    private boolean processMessage(ReservationMessage message) {
-        try {
-            String stringConcertMappingId = Long.toString(message.getConcertMappingId());
-            Long seatCapacity = retrieveSeatCapacity(stringConcertMappingId, message.getLocationId());
-            // 순번 지정해주는 로직 추가 예정
-
-            if (seatCapacity > 0) {
-                // update status: AVAILABLE
-                reservationRedisRepository.updateMemberStatus(stringConcertMappingId, message.getMemberEmail(), ReservationStatus.AVAILABLE);
-
-                // atomic decrement seat capacity
-                reservationRedisRepository.decrementConcertMappingSeatCapacity(stringConcertMappingId);
-
-                // delete zset data
-                reservationRedisRepository.deleteUserRank(stringConcertMappingId, message.getMemberEmail());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return true;
-    }
-
-    private Long retrieveSeatCapacity(String stringConcertMappingId, Long locationId) {
-        HashOperations<String, String, String> hashOps = stringRedisTemplate.opsForHash();
-        String key = "concertMappingId:" + stringConcertMappingId;
-        String hKey = "availableSeatCapacity";
-        String stringSeatCapacity = hashOps.get(key, hKey);
-        Long availableSeatCapacity;
-
-        if (stringSeatCapacity != null) {
-            availableSeatCapacity = Long.parseLong(stringSeatCapacity);
-        } else {
-            // 처음 가용한 좌석 수를 조회한 상황 -> RDB에서 Location의 SEAT_CAPACITY 조회
-            availableSeatCapacity = locationReader.retrieveLocationSeatCapacity(locationId);
-            reservationRedisRepository.storeConcertMappingSeatCapacity(stringConcertMappingId, availableSeatCapacity);
-        }
-        return availableSeatCapacity;
     }
 }

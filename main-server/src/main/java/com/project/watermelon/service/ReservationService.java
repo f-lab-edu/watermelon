@@ -95,22 +95,18 @@ public class ReservationService {
     }
 
     private Boolean isMemberExists(String stringConcertMappingId, String memberEmail) {
-        boolean isMemberExists = false;
         HashOperations<String, String, String> hashOps = stringRedisTemplate.opsForHash();
         String key = "concertMappingId:" + stringConcertMappingId + ":memberStatus";
 
         // 중복 체크
-        Boolean isMemberExist = hashOps.hasKey(key, memberEmail);
+        boolean isMemberExists = hashOps.hasKey(key, memberEmail);
 
-        if (!isMemberExist) {
+        if (!isMemberExists) {
             Optional<Reservation> reservation = reservationRepository.findByMember_Email(memberEmail);
             if (reservation.isPresent()) {
                 reservationRedisRepository.storeUserIdWithDefaultState(memberEmail, stringConcertMappingId);
                 isMemberExists = true;
             }
-        }
-        else {
-            isMemberExists = true;
         }
         return isMemberExists;
     }
