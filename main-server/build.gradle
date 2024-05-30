@@ -52,6 +52,12 @@ dependencies {
 
     // ULID 생성을 위한 라이브러리
     implementation 'de.huxhorn.sulky:de.huxhorn.sulky.ulid:8.2.0'
+
+    // JSON
+    implementation 'org.springframework.boot:spring-boot-starter-json'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.4'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.4'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.15.4'
 }
 
 tasks.named('test') {

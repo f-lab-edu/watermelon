@@ -18,6 +18,13 @@ java {
 
 repositories {
 	mavenCentral()
+	maven { url "https://repo.spring.io/release" }
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.boot:spring-boot-dependencies:3.2.5"
+	}
 }
 
 dependencies {
@@ -26,20 +33,27 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
+	runtimeOnly 'mysql:mysql-connector-java:8.0.28'
 
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-	runtimeOnly 'mysql:mysql-connector-java:8.0.28'
-	annotationProcessor 'org.projectlombok:lombok'
 
-	// kafka
-	implementation 'org.springframework.kafka:spring-kafka:3.0.10'
-	implementation 'org.springframework.boot:spring-boot-starter-kafka'
-	testImplementation 'org.springframework.kafka:spring-kafka-test'
+	// Kafka
 	implementation 'org.apache.kafka:kafka-clients:3.4.0'
-	// redis
+	implementation 'org.springframework.kafka:spring-kafka'
+	testImplementation 'org.springframework.kafka:spring-kafka-test'
+
+
+	// Redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	// JSON
+	implementation 'org.springframework.boot:spring-boot-starter-json'
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.4'
+	implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.4'
+	implementation 'com.fasterxml.jackson.core:jackson-core:2.15.4'
 }
 
 tasks.named('test') {

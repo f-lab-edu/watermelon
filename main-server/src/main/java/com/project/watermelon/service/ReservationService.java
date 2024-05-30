@@ -1,12 +1,10 @@
 package com.project.watermelon.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.watermelon.dto.model.ReservationMessageResponse;
 import com.project.watermelon.dto.reservation.ReservationMessageResponseDto;
 import com.project.watermelon.exception.MemberAlreadyRequestReservationException;
-import com.project.watermelon.model.ConcertMapping;
-import com.project.watermelon.model.Member;
 import com.project.watermelon.model.Reservation;
-import com.project.watermelon.repository.ConcertMappingRepository;
 import com.project.watermelon.repository.ReservationRedisRepository;
 import com.project.watermelon.repository.ReservationRepository;
 import jakarta.annotation.PostConstruct;
@@ -17,10 +15,11 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -34,7 +33,6 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final KafkaProducer<String, String> kafkaProducer;
     private final StringRedisTemplate stringRedisTemplate;
-    private final ConcertMappingRepository concertMappingRepository;
 
     @Value("${kafka.reservationMessageTopic}")
     private String reservationMessageTopic;
@@ -56,9 +54,8 @@ public class ReservationService {
         try {
             // 트랜잭션 시작
             kafkaProducer.beginTransaction();
-
-            String messageValue = "concertMappingId:" + stringConcertMappingId + ":"+ "waitingUser:" + memberEmail;
-            ProducerRecord<String, String> record = new ProducerRecord<>(reservationMessageTopic, stringConcertMappingId, messageValue);
+            // Jackson ObjectMapper 인스턴스 생성
+            ProducerRecord<String, String> record = transformMessageStringToJson(memberEmail, stringConcertMappingId);
             // Future 객체를 통해 send() 결과 확인
             Future<RecordMetadata> sendFuture = kafkaProducer.send(record);
 
@@ -87,6 +84,24 @@ public class ReservationService {
         }
         ReservationMessageResponse response = new ReservationMessageResponse(memberEmail);
         return new ReservationMessageResponseDto(response);
+    }
+
+    private ProducerRecord<String, String> transformMessageStringToJson(String memberEmail, String stringConcertMappingId) {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        // 데이터를 담을 Map 생성
+        Map<String, String> messageMap = new HashMap<>();
+        messageMap.put("concertMappingId", stringConcertMappingId);
+        messageMap.put("memberEmail", memberEmail);
+
+        try {
+            // Map을 JSON 문자열로 변환
+            String messageValue = objectMapper.writeValueAsString(messageMap);
+            return new ProducerRecord<>(reservationMessageTopic, stringConcertMappingId, messageValue);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to serialize message to JSON", e);
+        }
     }
 
     private Boolean isMemberExists(String stringConcertMappingId, String memberEmail) {

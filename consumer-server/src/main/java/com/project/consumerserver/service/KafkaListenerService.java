@@ -1,5 +1,6 @@
 package com.project.consumerserver.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.consumerserver.config.KafkaConfig;
 import com.project.consumerserver.dto.ReservationMessage;
 import lombok.RequiredArgsConstructor;
@@ -38,21 +39,30 @@ public class KafkaListenerService {
     }
 
     private ReservationMessage parseReservationMessage(String message) {
-        // message format: "concertMappingId:1:waitingUser:rlafbf222@naver.com"
-        String[] parts = message.split("(:)");
-        if (parts.length < 2) {
-            throw new IllegalArgumentException("Invalid message format: " + message);
-        }
-
-        Long concertMappingId;
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
-            concertMappingId = Long.parseLong(parts[1]);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid concertMappingId format: " + parts[1]);
+            return objectMapper.readValue(message, ReservationMessage.class);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid message format: " + message, e);
         }
-
-        String memberEmail = parts[3];
-
-        return new ReservationMessage(concertMappingId, memberEmail);
     }
+
+//    private ReservationMessage parseReservationMessage(String message) {
+//        // message format: "concertMappingId:1:waitingUser:rlafbf222@naver.com"
+//        String[] parts = message.split("(:)");
+//        if (parts.length < 2) {
+//            throw new IllegalArgumentException("Invalid message format: " + message);
+//        }
+//
+//        Long concertMappingId;
+//        try {
+//            concertMappingId = Long.parseLong(parts[1]);
+//        } catch (NumberFormatException e) {
+//            throw new IllegalArgumentException("Invalid concertMappingId format: " + parts[1]);
+//        }
+//
+//        String memberEmail = parts[3];
+//
+//        return new ReservationMessage(concertMappingId, memberEmail);
+//    }
 }
