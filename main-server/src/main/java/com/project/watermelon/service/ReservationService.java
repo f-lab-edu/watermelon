@@ -1,6 +1,7 @@
 package com.project.watermelon.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.watermelon.dto.CommonBackendResponseDto;
 import com.project.watermelon.dto.model.ReservationMessageResponse;
 import com.project.watermelon.dto.reservation.ReservationMessageResponseDto;
 import com.project.watermelon.exception.MemberAlreadyRequestReservationException;
@@ -43,7 +44,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationMessageResponseDto produceReservationMessage(String memberEmail, Long concertMappingId) {
+    public CommonBackendResponseDto<String> produceReservationMessage(String memberEmail, Long concertMappingId) {
         String stringConcertMappingId = Long.toString(concertMappingId);
 
         if (isMemberExists(stringConcertMappingId, memberEmail)) {
@@ -82,8 +83,8 @@ public class ReservationService {
             kafkaProducer.abortTransaction();
             e.printStackTrace();
         }
-        ReservationMessageResponse response = new ReservationMessageResponse(memberEmail);
-        return new ReservationMessageResponseDto(response);
+
+        return new CommonBackendResponseDto<>();
     }
 
     private ProducerRecord<String, String> transformMessageStringToJson(String memberEmail, String stringConcertMappingId) {
