@@ -27,7 +27,5 @@ public class ReservationCronJobService {
 
             reservationRepository.updateReservationStatus(targetConcertMappingId, updateCount);
         }
-        // 위와 같은 정책을 바탕으로 업데이트 진행
-
     }
 }
