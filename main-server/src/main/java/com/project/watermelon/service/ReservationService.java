@@ -2,8 +2,6 @@ package com.project.watermelon.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.watermelon.dto.CommonBackendResponseDto;
-import com.project.watermelon.dto.model.ReservationMessageResponse;
-import com.project.watermelon.dto.reservation.ReservationMessageResponseDto;
 import com.project.watermelon.exception.MemberAlreadyRequestReservationException;
 import com.project.watermelon.model.Reservation;
 import com.project.watermelon.repository.ReservationRedisRepository;

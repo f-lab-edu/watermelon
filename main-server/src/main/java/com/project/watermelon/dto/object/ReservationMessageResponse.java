@@ -1,4 +1,4 @@
-package com.project.watermelon.dto.model;
+package com.project.watermelon.dto.object;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

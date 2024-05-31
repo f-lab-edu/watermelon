@@ -48,8 +48,7 @@ public class WebSecurityConfig {
 //                        .requestMatchers("/**").permitAll() // for local debug
 
                         .requestMatchers("/members/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/posts").permitAll()
-                        .requestMatchers("/api/availability").hasAnyAuthority(MemberRole.MEMBER.getAuthority())
+                        .requestMatchers(HttpMethod.GET, "/concerts/*").permitAll()
                         .requestMatchers("/reservations/*").hasAnyAuthority(MemberRole.MEMBER.getAuthority())
                         .anyRequest().hasAuthority(MemberRole.QUALIFIED_MEMBER.getAuthority()))
 
