@@ -24,9 +24,9 @@ public class Location extends Timestamped {
     @Column()
     private Long seatCapacity;
 
-    @OneToMany(mappedBy = "location")
-    private List<ConcertMapping> concertMappingList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "location")
-    private List<Seat> seatList = new ArrayList<>();
+//    @OneToMany(mappedBy = "location")
+//    private List<ConcertMapping> concertMappingList = new ArrayList<>();
+//
+//    @OneToMany(mappedBy = "location")
+//    private List<Seat> seatList = new ArrayList<>();
 }

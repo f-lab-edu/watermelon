@@ -24,7 +24,7 @@ public class Concert extends Timestamped {
     @Column(nullable = false)
     private String genre;
 
-    @OneToMany(mappedBy = "concert")
-    private List<ConcertMapping> concertMappingList = new ArrayList<>();
+//    @OneToMany(mappedBy = "concert")
+//    private List<ConcertMapping> concertMappingList = new ArrayList<>();
 }
 
