@@ -7,38 +7,29 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class RestApiExceptionHandler {
 
-    @ExceptionHandler(value = { IllegalArgumentException.class})
-    public ResponseEntity<Object> handleApiRequestException(IllegalArgumentException ex) {
+    @ExceptionHandler(value = { IllegalArgumentException.class, NullPointerException.class })
+    public ResponseEntity<Object> handleCommonExceptions(RuntimeException ex) {
+        ErrorCode errorCode = ErrorCode.BAD_REQUEST;
+        if (ex instanceof CustomException) {
+            errorCode = ((CustomException) ex).getErrorCode();
+        }
+
         RestApiExceptionInfo restApiExceptionInfo = new RestApiExceptionInfo();
-
-        ErrorCode errorCode = ErrorCode.ILLEGAL_ARGUMENT_EXCEPTION;
-
         restApiExceptionInfo.setHttpStatus(errorCode.getHttpStatus());
         restApiExceptionInfo.setErrorMessage(ex.getMessage());
+        restApiExceptionInfo.setErrorCode(errorCode.getErrorCode());
 
-        return new ResponseEntity(restApiExceptionInfo, restApiExceptionInfo.getHttpStatus());
-    }
-
-    @ExceptionHandler(value = { NullPointerException.class})
-    public ResponseEntity<Object> handleApiRequestException(NullPointerException ex) {
-        RestApiExceptionInfo restApiExceptionInfo = new RestApiExceptionInfo();
-
-        ErrorCode errorCode = ErrorCode.NULL_POINTER_EXCEPTION;
-
-        restApiExceptionInfo.setHttpStatus(errorCode.getHttpStatus());
-        restApiExceptionInfo.setErrorMessage(ex.getMessage());
-
-        return new ResponseEntity(restApiExceptionInfo, restApiExceptionInfo.getHttpStatus());
+        return new ResponseEntity<>(restApiExceptionInfo, restApiExceptionInfo.getHttpStatus());
     }
 
     @ExceptionHandler(value = { MemberAlreadyRequestReservationException.class })
-    public ResponseEntity<Object> handleMemberAlreadyRequestReservationException(MemberAlreadyRequestReservationException ex) {
+    public ResponseEntity<Object> handleCustomExceptions(CustomException ex) {
         RestApiExceptionInfo restApiExceptionInfo = new RestApiExceptionInfo();
-
-        ErrorCode errorCode = ErrorCode.MEMBER_ALREADY_REQUEST_RESERVATION_EXCEPTION;
+        ErrorCode errorCode = ex.getErrorCode();
 
         restApiExceptionInfo.setHttpStatus(errorCode.getHttpStatus());
         restApiExceptionInfo.setErrorMessage(ex.getMessage());
+        restApiExceptionInfo.setErrorCode(errorCode.getErrorCode());
 
         return new ResponseEntity<>(restApiExceptionInfo, restApiExceptionInfo.getHttpStatus());
     }

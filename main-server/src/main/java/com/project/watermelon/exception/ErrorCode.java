@@ -6,19 +6,9 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ErrorCode {
     // 400 Bad Request
-    ILLEGAL_ARGUMENT_EXCEPTION(HttpStatus.BAD_REQUEST, "400"),
-    NULL_POINTER_EXCEPTION(HttpStatus.BAD_REQUEST, "400"),
-    MISSING_SERVLET_REQUEST_PART_EXCEPTION(HttpStatus.BAD_REQUEST, "400"),
-    CONSTRAINT_VIOLATION_EXCEPTION(HttpStatus.BAD_REQUEST, "400"),
-    PROPERTY_VALUE_EXCEPTION(HttpStatus.BAD_REQUEST, "400"),
-    SIZE_LIMIT_EXCEEDED_EXCEPTION(HttpStatus.BAD_REQUEST, "400"),
-    MEMBER_ALREADY_REQUEST_RESERVATION_EXCEPTION(HttpStatus.BAD_REQUEST, "400"),
-
-    // 401 Unauthorized
-    UNAUTHORIZED_EXCEPTION(HttpStatus.UNAUTHORIZED, "401"),
-
-    // 403 Forbidden
-    FORBIDDEN_EXCEPTION(HttpStatus.FORBIDDEN, "403");
+    BAD_REQUEST(HttpStatus.BAD_REQUEST, "400"),
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "401"),
+    FORBIDDEN(HttpStatus.FORBIDDEN, "403");
 
     private final HttpStatus httpStatus;
     private final String errorCode;
