@@ -37,7 +37,7 @@ public class Purchase extends Timestamped {
     @JoinColumn(name="ticketId", nullable = false)
     private Ticket ticket;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memberId", nullable = false)
     private Member member;
 }

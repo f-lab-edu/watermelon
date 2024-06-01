@@ -32,5 +32,8 @@ public class Seat extends Timestamped {
     @ManyToOne
     @JoinColumn(name = "locationId", nullable = false)
     private Location location;
+
+    @OneToOne(mappedBy = "seat")
+    private Ticket ticket;
 }
 

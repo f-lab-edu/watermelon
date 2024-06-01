@@ -22,8 +22,7 @@ public class RestApiExceptionHandler {
         return new ResponseEntity<>(restApiExceptionInfo, restApiExceptionInfo.getHttpStatus());
     }
 
-    @ExceptionHandler(value = { MemberAlreadyRequestReservationException.class })
-    public ResponseEntity<Object> handleCustomExceptions(CustomException ex) {
+    private ResponseEntity<Object> getObjectResponseEntity(CustomException ex) {
         RestApiExceptionInfo restApiExceptionInfo = new RestApiExceptionInfo();
         ErrorCode errorCode = ex.getErrorCode();
 
@@ -32,5 +31,15 @@ public class RestApiExceptionHandler {
         restApiExceptionInfo.setErrorCode(errorCode.getErrorCode());
 
         return new ResponseEntity<>(restApiExceptionInfo, restApiExceptionInfo.getHttpStatus());
+    }
+
+    @ExceptionHandler(value = { MemberAlreadyRequestReservationException.class })
+    public ResponseEntity<Object> handleMemberAlreadyRequestReservationExceptions(CustomException ex) {
+        return getObjectResponseEntity(ex);
+    }
+
+    @ExceptionHandler(value = { InvalidIdException.class })
+    public ResponseEntity<Object> handleInvalidIdExceptions(CustomException ex) {
+        return getObjectResponseEntity(ex);
     }
 }

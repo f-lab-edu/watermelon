@@ -16,8 +16,8 @@ public class Ticket extends Timestamped {
     private Long ticketId;
 
     // relation은 걸지 않은 약한 결합
-    @Column(unique = true)
-    private Long seatId;
+//    @Column(unique = true)
+//    private Long seatId;
 
     @ManyToOne
     @JoinColumn(name = "concertMappingId", nullable = false)
@@ -25,4 +25,8 @@ public class Ticket extends Timestamped {
 
     @OneToOne(mappedBy = "ticket")
     private Purchase purchase;
+
+    @OneToOne
+    @JoinColumn(name="seatId", nullable = false)
+    private Seat seat;
 }

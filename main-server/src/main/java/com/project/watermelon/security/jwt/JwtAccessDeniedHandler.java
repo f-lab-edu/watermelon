@@ -20,7 +20,7 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException {
         // 필요한 권한이 없이 접근하려 할때 403
         RestApiExceptionInfo restApiException = new RestApiExceptionInfo();
-        ErrorCode errorCode = ErrorCode.FORBIDDEN_EXCEPTION;
+        ErrorCode errorCode = ErrorCode.FORBIDDEN;
 
         restApiException.setHttpStatus(errorCode.getHttpStatus());
         restApiException.setErrorMessage("Access Denied.");
