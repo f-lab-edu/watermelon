@@ -49,7 +49,13 @@ public class SeatService {
         for (Seat seat : allSeatList) {
             long seatId = seat.getSeatId();
             boolean isAvailable = !notAvailableSeatIdList.contains(seatId);
-            seatDtoList.add(new SeatDto(seat.getSeatId(), seat.getSection(), seat.getRowValue(), isAvailable));
+            seatDtoList.add(
+                SeatDto.builder()
+                .seatId(seat.getSeatId())
+                .section(seat.getSection())
+                .rowValue(seat.getRowValue())
+                .isAvailable(isAvailable).build()
+            );
         }
 
         // SeatListResponseDto 생성 및 반환

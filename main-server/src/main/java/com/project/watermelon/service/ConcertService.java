@@ -44,17 +44,16 @@ public class ConcertService {
             Concert concert = concertMapping.getConcert();
             Location location = concertMapping.getLocation();
             concertMappingDtoList.add(
-                    new ConcertMappingDto(
-                            concertMapping.getConcertMappingId(),
-                            concert.getConcertId(),
-                            location.getLocationId(),
-                            concert.getTitle(),
-                            concert.getGenre(),
-                            concertMapping.getConcertDate(),
-                            concertMapping.getStartTime(),
-                            concertMapping.getEndTime(),
-                            location.getLocationName()
-                    )
+                    ConcertMappingDto.builder()
+                            .concertMappingId(concertMapping.getConcertMappingId())
+                            .concertId(concert.getConcertId())
+                            .locationId(location.getLocationId())
+                            .title(concert.getTitle())
+                            .genre(concert.getGenre())
+                            .concertDate(concertMapping.getConcertDate())
+                            .startTime(concertMapping.getStartTime())
+                            .endTime(concertMapping.getEndTime())
+                            .build()
             );
         }
         ConcertMappingResponse concertMappingResponse = new ConcertMappingResponse(concertMappingDtoList);
