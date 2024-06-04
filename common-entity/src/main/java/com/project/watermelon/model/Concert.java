@@ -6,27 +6,22 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @NoArgsConstructor
 @Getter
 @Setter
 @Entity
-public class Location extends Timestamped {
+public class Concert extends Timestamped {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private Long locationId;
+    private Long concertId;
 
     @Column(nullable = false)
-    private String locationName;
+    private String title;
 
-    @Column()
-    private Long seatCapacity;
+    @Column(nullable = false)
+    private String genre;
 
-//    @OneToMany(mappedBy = "location")
+//    @OneToMany(mappedBy = "concert")
 //    private List<ConcertMapping> concertMappingList = new ArrayList<>();
-//
-//    @OneToMany(mappedBy = "location")
-//    private List<Seat> seatList = new ArrayList<>();
 }
+

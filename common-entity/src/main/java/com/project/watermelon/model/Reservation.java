@@ -1,8 +1,10 @@
 package com.project.watermelon.model;
 
+import com.project.watermelon.enumeration.MemberRole;
 import com.project.watermelon.enumeration.ReservationStatus;
 import com.project.watermelon.util.Timestamped;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -33,4 +35,12 @@ public class Reservation extends Timestamped {
     @ManyToOne
     @JoinColumn(name = "memberId", nullable = false)
     private Member member;
+
+    @Builder
+    public Reservation(Long reservationRank, ReservationStatus status, ConcertMapping concertMapping, Member member) {
+        this.reservationRank = reservationRank;
+        this.status = status;
+        this.concertMapping = concertMapping;
+        this.member = member;
+    }
 }

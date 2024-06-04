@@ -1,13 +1,11 @@
 package com.project.watermelon.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+
+import lombok.*;
 import com.project.watermelon.enumeration.MemberRole;
 import com.project.watermelon.util.Timestamped;
-import jakarta.persistence.*;
-import lombok.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 @NoArgsConstructor
@@ -46,6 +44,5 @@ public class Member extends Timestamped {
         this.password = password;
         this.memberRole = memberRole;
         this.email = email;
-
     }
 }
