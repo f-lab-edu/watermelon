@@ -67,19 +67,18 @@ public class ReservationService {
             reservationRedisRepository.storeUserIdWithDefaultState(memberEmail, stringConcertMappingId);
             System.out.println("Message sent to topic " + metadata.topic() + " with offset " + metadata.offset());
         } catch (TimeoutException e) {
+            kafkaProducer.abortTransaction();
             System.out.println("Timeout while waiting for message send to complete");
-            kafkaProducer.abortTransaction();
+            throw new RuntimeException("TimeoutException occurred during message production", e);
         } catch (ExecutionException e) {
+            kafkaProducer.abortTransaction();
             System.out.println("Execution exception while sending message");
-            kafkaProducer.abortTransaction();
+            throw new RuntimeException("ExecutionException occurred during message production", e);
         } catch (InterruptedException e) {
+            kafkaProducer.abortTransaction();
             System.out.println("Interrupted while waiting for message send to complete");
-            kafkaProducer.abortTransaction();
             Thread.currentThread().interrupt();  // Restore interrupted status
-        } catch (Exception e) {
-            // 기타 예외 발생 시 트랜잭션 중단
-            kafkaProducer.abortTransaction();
-            e.printStackTrace();
+            throw new RuntimeException("InterruptedException occurred during message production", e);
         }
 
         return new CommonBackendResponseDto<>();
