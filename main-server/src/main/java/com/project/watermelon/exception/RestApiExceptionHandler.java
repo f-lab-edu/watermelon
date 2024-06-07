@@ -1,37 +1,45 @@
 package com.project.watermelon.exception;
 
-import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
-import org.hibernate.PropertyValueException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
-
-@RestControllerAdvice // Json형태로 restApiException Body 부분에 태워 보내준다.
+@RestControllerAdvice
 public class RestApiExceptionHandler {
 
-    @ExceptionHandler(value = { IllegalArgumentException.class})
-    public ResponseEntity<Object> handleApiRequestException(IllegalArgumentException ex) {
+    @ExceptionHandler(value = { IllegalArgumentException.class, NullPointerException.class })
+    public ResponseEntity<Object> handleCommonExceptions(RuntimeException ex) {
+        ErrorCode errorCode = ErrorCode.BAD_REQUEST;
+        if (ex instanceof CustomException) {
+            errorCode = ((CustomException) ex).getErrorCode();
+        }
+
         RestApiExceptionInfo restApiExceptionInfo = new RestApiExceptionInfo();
-
-        ErrorCode errorCode = ErrorCode.ILLEGAL_ARGUMENT_EXCEPTION;
-
         restApiExceptionInfo.setHttpStatus(errorCode.getHttpStatus());
         restApiExceptionInfo.setErrorMessage(ex.getMessage());
+        restApiExceptionInfo.setErrorCode(errorCode.getErrorCode());
 
-        return new ResponseEntity(restApiExceptionInfo, restApiExceptionInfo.getHttpStatus());
+        return new ResponseEntity<>(restApiExceptionInfo, restApiExceptionInfo.getHttpStatus());
     }
 
-    @ExceptionHandler(value = { NullPointerException.class})
-    public ResponseEntity<Object> handleApiRequestException(NullPointerException ex) {
+    private ResponseEntity<Object> getObjectResponseEntity(CustomException ex) {
         RestApiExceptionInfo restApiExceptionInfo = new RestApiExceptionInfo();
-
-        ErrorCode errorCode = ErrorCode.NULL_POINTER_EXCEPTION;
+        ErrorCode errorCode = ex.getErrorCode();
 
         restApiExceptionInfo.setHttpStatus(errorCode.getHttpStatus());
         restApiExceptionInfo.setErrorMessage(ex.getMessage());
+        restApiExceptionInfo.setErrorCode(errorCode.getErrorCode());
 
-        return new ResponseEntity(restApiExceptionInfo, restApiExceptionInfo.getHttpStatus());
+        return new ResponseEntity<>(restApiExceptionInfo, restApiExceptionInfo.getHttpStatus());
+    }
+
+    @ExceptionHandler(value = { MemberAlreadyRequestReservationException.class })
+    public ResponseEntity<Object> handleMemberAlreadyRequestReservationExceptions(CustomException ex) {
+        return getObjectResponseEntity(ex);
+    }
+
+    @ExceptionHandler(value = { InvalidIdException.class })
+    public ResponseEntity<Object> handleInvalidIdExceptions(CustomException ex) {
+        return getObjectResponseEntity(ex);
     }
 }

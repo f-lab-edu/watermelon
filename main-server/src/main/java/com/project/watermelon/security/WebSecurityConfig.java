@@ -45,11 +45,15 @@ public class WebSecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
-//                        .requestMatchers("/**").permitAll() // for local debug
+//                        .requestMatchers("/**").permitAll()) // for local debug
 
+                        .requestMatchers("/index.html","/signup.html", "/login.html").permitAll() // 회원가입, 로그인 페이지 허용
+                        .requestMatchers("/css/**", "/js/**").permitAll() // CSS, JavaScript 파일 허용
                         .requestMatchers("/members/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/posts").permitAll()
-                        .requestMatchers("/api/availability").hasAnyAuthority(MemberRole.MEMBER.getAuthority())
+                        .requestMatchers("/seats/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/webapp/resources/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/concerts/**").permitAll()
+                        .requestMatchers("/reservations/*").hasAnyAuthority(MemberRole.MEMBER.getAuthority())
                         .anyRequest().hasAuthority(MemberRole.QUALIFIED_MEMBER.getAuthority()))
 
                 .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);

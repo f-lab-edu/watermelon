@@ -8,9 +8,16 @@ consumer-server/out/
 consumer-server/gradlew
 consumer-server/gradlew.bat
 
+common-entity/src/main/resources/application.properties
+common-entity/build/
+common-entity/out/
+common-entity/gradlew
+common-entity/gradlew.bat
+
 /build
 .gradle/
 .DS_Store
 
 # IntelliJ IDEA files
 .idea/
+seat_data.json
