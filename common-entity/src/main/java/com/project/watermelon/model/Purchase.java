@@ -1,6 +1,5 @@
 package com.project.watermelon.model;
 
-import com.project.watermelon.enumeration.MemberRole;
 import com.project.watermelon.enumeration.PurchaseStatus;
 import com.project.watermelon.util.Timestamped;
 import jakarta.persistence.*;
@@ -10,8 +9,6 @@ import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @NoArgsConstructor
 @Getter

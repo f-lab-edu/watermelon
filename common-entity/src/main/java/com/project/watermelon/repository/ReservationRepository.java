@@ -1,7 +1,6 @@
 package com.project.watermelon.repository;
 
 
-import com.project.watermelon.model.ConcertMapping;
 import com.project.watermelon.model.Reservation;
 import org.springframework.data.jpa.repository.JpaRepository;
 

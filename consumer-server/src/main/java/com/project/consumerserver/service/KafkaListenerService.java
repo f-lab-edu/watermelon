@@ -1,7 +1,6 @@
 package com.project.consumerserver.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.consumerserver.config.KafkaConfig;
 import com.project.consumerserver.dto.ReservationMessage;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class KafkaListenerService {
 
-    private final KafkaConfig kafkaConfig;
     private final ReservationService reservationService;
 
     @KafkaListener(topics = "#{@kafkaConfig.getReservationMessageTopic()}", groupId = "#{@kafkaConfig.getReservationMessageGroup()}")
