@@ -1,11 +1,15 @@
-package com.project.consumerserver.dto;
+package com.project.watermelon.vo;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class ConcertMappingSeatInfoDTO {
+@NoArgsConstructor
+@AllArgsConstructor
+public class ConcertMappingSeatInfoVO {
     private Long concertMappingId;
     private Long seatCapacity;
 }

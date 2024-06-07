@@ -8,6 +8,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @Getter
@@ -27,6 +30,10 @@ public class Reservation extends Timestamped {
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
     private ReservationStatus status = ReservationStatus.WAIT;
+
+    @Column(nullable = false)
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    private LocalDateTime availableAt;
 
     @ManyToOne
     @JoinColumn(name = "concertMappingId", nullable = false)
