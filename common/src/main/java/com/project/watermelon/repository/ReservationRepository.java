@@ -17,7 +17,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     Optional<Reservation> findByMember_Email(String email);
 
     @Query("""
-        SELECT new com.project.watermelon.vo.ConcertMappingSeatInfoVO(c.concertMappingId, l.seatCapacity)
+        SELECT DISTINCT new com.project.watermelon.vo.ConcertMappingSeatInfoVO(C.concertMappingId, L.seatCapacity)
         FROM Reservation R
         JOIN R.concertMapping C
         JOIN C.location L
@@ -59,7 +59,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             LIMIT :count
         ) subquery
         ON R.RESERVATION_ID = subquery.RESERVATION_ID
-        SET R.STATUS = 'AVAILABLE'
+        SET
+            R.STATUS = 'AVAILABLE',
+            R.AVAILABLE_AT = NOW()
     """, nativeQuery = true)
     void updateReservationStatus(@Param("concertMappingId") Long concertMappingId, @Param("count") Long count);
 }

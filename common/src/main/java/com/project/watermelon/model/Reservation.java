@@ -1,6 +1,5 @@
 package com.project.watermelon.model;
 
-import com.project.watermelon.enumeration.MemberRole;
 import com.project.watermelon.enumeration.ReservationStatus;
 import com.project.watermelon.util.Timestamped;
 import jakarta.persistence.*;
@@ -31,7 +30,7 @@ public class Reservation extends Timestamped {
     @Column(nullable = false)
     private ReservationStatus status = ReservationStatus.WAIT;
 
-    @Column(nullable = false)
+    @Column()
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime availableAt;
 
