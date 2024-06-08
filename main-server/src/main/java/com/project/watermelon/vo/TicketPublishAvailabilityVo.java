@@ -1,10 +1,10 @@
-package com.project.watermelon.dto.object;
+package com.project.watermelon.vo;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class TicketPublishAvailability {
+public class TicketPublishAvailabilityVo {
     private boolean availability;
 }
