@@ -1,4 +1,4 @@
-package com.project.watermelon.dto.object;
+package com.project.watermelon.vo;
 
 import com.project.watermelon.dto.concert.ConcertDto;
 import com.project.watermelon.dto.concert.ConcertMappingDto;

@@ -1,6 +1,5 @@
 package com.project.watermelon.service;
 
-import com.project.watermelon.dto.object.SeatListResponse;
 import com.project.watermelon.dto.seat.SeatDto;
 import com.project.watermelon.dto.seat.SeatListResponseDto;
 import com.project.watermelon.enumeration.PurchaseStatus;
@@ -11,6 +10,7 @@ import com.project.watermelon.model.Seat;
 import com.project.watermelon.repository.ConcertMappingRepository;
 import com.project.watermelon.repository.PurchaseRepository;
 import com.project.watermelon.repository.SeatRepository;
+import com.project.watermelon.vo.SeatListResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
