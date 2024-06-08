@@ -8,6 +8,12 @@ consumer-server/out/
 consumer-server/gradlew
 consumer-server/gradlew.bat
 
+common/src/main/resources/application.properties
+common/build/
+common/out/
+common/gradlew
+common/gradlew.bat
+
 /build
 .gradle/
 .DS_Store

@@ -1,11 +1,7 @@
 package com.project.consumerserver.repository;
 
-import com.project.consumerserver.enumeration.ReservationStatus;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Repository;
 
 @Repository
