@@ -32,12 +32,6 @@ public class Member extends Timestamped {
     @Column(nullable = false)
     private MemberRole memberRole = MemberRole.MEMBER;
 
-//    @OneToMany(mappedBy = "member")
-//    private List<Purchase> purchaseList = new ArrayList<>();
-//
-//    @OneToMany(mappedBy = "member")
-//    private List<Reservation> reservationList = new ArrayList<>();
-
     @Builder
     public Member(String memberName, String password, MemberRole memberRole, String email) {
         this.memberName = memberName;
