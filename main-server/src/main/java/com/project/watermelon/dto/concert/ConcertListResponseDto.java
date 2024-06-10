@@ -1,10 +1,10 @@
 package com.project.watermelon.dto.concert;
 
 import com.project.watermelon.dto.CommonBackendResponseDto;
-import com.project.watermelon.vo.ConcertListResponse;
+import com.project.watermelon.vo.ConcertListResponseVo;
 
-public class ConcertListResponseDto extends CommonBackendResponseDto<ConcertListResponse> {
-    public ConcertListResponseDto(ConcertListResponse concertListResponse){
+public class ConcertListResponseDto extends CommonBackendResponseDto<ConcertListResponseVo> {
+    public ConcertListResponseDto(ConcertListResponseVo concertListResponse){
         super.setData(concertListResponse);
     }
 }

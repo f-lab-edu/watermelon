@@ -7,10 +7,9 @@ import com.project.watermelon.exception.InvalidIdException;
 import com.project.watermelon.model.ConcertMapping;
 import com.project.watermelon.model.Purchase;
 import com.project.watermelon.model.Seat;
-import com.project.watermelon.repository.ConcertMappingRepository;
 import com.project.watermelon.repository.PurchaseRepository;
 import com.project.watermelon.repository.SeatRepository;
-import com.project.watermelon.vo.SeatListResponse;
+import com.project.watermelon.vo.SeatListResponseVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -59,7 +58,7 @@ public class SeatService {
         }
 
         // SeatListResponseDto 생성 및 반환
-        SeatListResponse seatListResponse = new SeatListResponse(seatDtoList);
+        SeatListResponseVo seatListResponse = new SeatListResponseVo(seatDtoList);
         return new SeatListResponseDto(seatListResponse);
     }
 }

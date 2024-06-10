@@ -9,8 +9,8 @@ import com.project.watermelon.model.ConcertMapping;
 import com.project.watermelon.model.Location;
 import com.project.watermelon.repository.ConcertMappingRepository;
 import com.project.watermelon.repository.ConcertRepository;
-import com.project.watermelon.vo.ConcertListResponse;
-import com.project.watermelon.vo.ConcertMappingResponse;
+import com.project.watermelon.vo.ConcertListResponseVo;
+import com.project.watermelon.vo.ConcertMappingResponseVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +31,7 @@ public class ConcertService {
         for (Concert concert : concertList) {
             concertDtoList.add(new ConcertDto(concert.getConcertId(), concert.getTitle(), concert.getGenre()));
         }
-        ConcertListResponse concertListResponse = new ConcertListResponse(concertDtoList);
+        ConcertListResponseVo concertListResponse = new ConcertListResponseVo(concertDtoList);
         return new ConcertListResponseDto(concertListResponse);
     }
 
@@ -56,7 +56,7 @@ public class ConcertService {
                             .build()
             );
         }
-        ConcertMappingResponse concertMappingResponse = new ConcertMappingResponse(concertMappingDtoList);
+        ConcertMappingResponseVo concertMappingResponse = new ConcertMappingResponseVo(concertMappingDtoList);
         return new ConcertMappingResponseDto(concertMappingResponse);
     }
 
