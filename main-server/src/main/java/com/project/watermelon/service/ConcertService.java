@@ -1,21 +1,21 @@
 package com.project.watermelon.service;
 
-import com.project.watermelon.dto.concert.ConcertDto;
 import com.project.watermelon.dto.concert.ConcertListResponseDto;
-import com.project.watermelon.dto.concert.ConcertMappingDto;
 import com.project.watermelon.dto.concert.ConcertMappingResponseDto;
 import com.project.watermelon.model.Concert;
 import com.project.watermelon.model.ConcertMapping;
 import com.project.watermelon.model.Location;
 import com.project.watermelon.repository.ConcertMappingRepository;
 import com.project.watermelon.repository.ConcertRepository;
-import com.project.watermelon.vo.ConcertListResponseVo;
+import com.project.watermelon.vo.ConcertListVo;
 import com.project.watermelon.vo.ConcertMappingResponseVo;
+import com.project.watermelon.vo.ConcertMappingVo;
+import com.project.watermelon.vo.ConcertVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,13 +25,14 @@ public class ConcertService {
 
     public ConcertListResponseDto retrieveConcertList() {
         // 전체 콘서트 리스트 조회
-        List<Concert> concertList = concertRepository.findAll();
-
-        List<ConcertDto> concertDtoList = new ArrayList<>();
-        for (Concert concert : concertList) {
-            concertDtoList.add(new ConcertDto(concert.getConcertId(), concert.getTitle(), concert.getGenre()));
-        }
-        ConcertListResponseVo concertListResponse = new ConcertListResponseVo(concertDtoList);
+        List<ConcertVo> concertVoList = concertRepository.findAll().stream()
+                .map(concert -> ConcertVo.builder()
+                        .concertId(concert.getConcertId())
+                        .title(concert.getTitle())
+                        .genre(concert.getGenre())
+                        .build())
+                .collect(Collectors.toList());
+        ConcertListVo concertListResponse = new ConcertListVo(concertVoList);
         return new ConcertListResponseDto(concertListResponse);
     }
 
@@ -39,24 +40,23 @@ public class ConcertService {
         // 실제 콘서트 공연 리스트 조회
         List<ConcertMapping> concertMappingList = concertMappingRepository.findByConcertIdWithDetails(concertId);
 
-        List<ConcertMappingDto> concertMappingDtoList = new ArrayList<>();
-        for (ConcertMapping concertMapping : concertMappingList) {
-            Concert concert = concertMapping.getConcert();
-            Location location = concertMapping.getLocation();
-            concertMappingDtoList.add(
-                    ConcertMappingDto.builder()
-                            .concertMappingId(concertMapping.getConcertMappingId())
-                            .concertId(concert.getConcertId())
-                            .locationId(location.getLocationId())
-                            .title(concert.getTitle())
-                            .genre(concert.getGenre())
-                            .concertDate(concertMapping.getConcertDate())
-                            .startTime(concertMapping.getStartTime())
-                            .endTime(concertMapping.getEndTime())
-                            .build()
-            );
-        }
-        ConcertMappingResponseVo concertMappingResponse = new ConcertMappingResponseVo(concertMappingDtoList);
+        List<ConcertMappingVo> concertMappingVoList = concertMappingList.stream()
+            .map(concertMapping -> {
+                Concert concert = concertMapping.getConcert();
+                Location location = concertMapping.getLocation();
+                return ConcertMappingVo.builder()
+                        .concertMappingId(concertMapping.getConcertMappingId())
+                        .concertId(concert.getConcertId())
+                        .locationId(location.getLocationId())
+                        .title(concert.getTitle())
+                        .genre(concert.getGenre())
+                        .concertDate(concertMapping.getConcertDate())
+                        .startTime(concertMapping.getStartTime())
+                        .endTime(concertMapping.getEndTime())
+                        .build();
+            })
+        .collect(Collectors.toList());
+        ConcertMappingResponseVo concertMappingResponse = new ConcertMappingResponseVo(concertMappingVoList);
         return new ConcertMappingResponseDto(concertMappingResponse);
     }
 

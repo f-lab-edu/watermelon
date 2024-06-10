@@ -4,6 +4,7 @@ package com.project.watermelon.repository;
 import com.project.watermelon.enumeration.ReservationStatus;
 import com.project.watermelon.model.Reservation;
 import com.project.watermelon.vo.ConcertMappingSeatInfoVO;
+import com.project.watermelon.vo.ReservationSeatVo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -64,4 +65,16 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             R.AVAILABLE_AT = NOW()
     """, nativeQuery = true)
     void updateReservationStatus(@Param("concertMappingId") Long concertMappingId, @Param("count") Long count);
+
+    @Query("""
+    SELECT new com.project.watermelon.vo.ReservationSeatVo(R.reservationId, T.ticketId, T.seat.seatId)
+    FROM Reservation R
+    JOIN Ticket T
+    ON R.ticketId = T.ticketId
+    WHERE R.concertMapping.concertMappingId = :concertMappingId
+    AND R.status IN :statuses
+    """)
+    List<ReservationSeatVo> findByConcertMappingIdAndStatuses(@Param("concertMappingId") Long concertMappingId,
+                                                     @Param("statuses") List<ReservationStatus> statuses);
+
 }

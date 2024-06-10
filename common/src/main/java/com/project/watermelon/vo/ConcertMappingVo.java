@@ -1,4 +1,4 @@
-package com.project.watermelon.dto.concert;
+package com.project.watermelon.vo;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class ConcertMappingDto {
+public class ConcertMappingVo {
     private Long concertMappingId;
     private Long concertId;
     private Long locationId;
@@ -21,7 +21,7 @@ public class ConcertMappingDto {
     private String locationName;
 
     @Builder
-    public ConcertMappingDto(
+    public ConcertMappingVo(
             Long concertMappingId,
             Long concertId,
             Long locationId,
