@@ -36,11 +36,5 @@ public class ConcertMapping extends Timestamped {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "locationId", nullable = false)
     private Location location;
-
-//    @OneToMany(mappedBy = "concertMapping")
-//    private List<Ticket> ticketList = new ArrayList<>();
-//
-//    @OneToMany(mappedBy = "concertMapping")
-//    private List<Reservation> reservationList = new ArrayList<>();
 }
 
