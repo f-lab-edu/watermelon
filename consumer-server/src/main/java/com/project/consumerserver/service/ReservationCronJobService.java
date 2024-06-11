@@ -20,6 +20,7 @@ public class ReservationCronJobService {
     public void updateReservation() {
         // 전체 전제 조건: 공연일이 현재 보다 미래인 데이터에 대해서만 수행.
         // 예매 테이블에서 AVAILABLE_AT -> 10분 지난 경우 일괄 EXPIRED 로 update
+        // 결제 시 reservation lock check -> 분산락 키워드 검색해보기!
         reservationRepository.updateToExpiredStatus();
 
         // 예매 테이블에서 유니크한 CONCERT_MAPPING_ID 조회 (단 공연일이 지난 것들은 제외)
