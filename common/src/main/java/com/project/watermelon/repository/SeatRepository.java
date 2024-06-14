@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface SeatRepository extends JpaRepository<Seat, Long> {
     List<Seat> findAllByLocation_LocationId(Long locationId);
+
+
 }

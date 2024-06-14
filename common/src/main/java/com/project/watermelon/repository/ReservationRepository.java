@@ -20,6 +20,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     Optional<Reservation> findByMember_Email(String email);
 
+    Optional<Reservation> findByReservationId(Long reservationId);
+
     @Query("""
         SELECT DISTINCT new com.project.watermelon.vo.ConcertMappingSeatInfoVO(C.concertMappingId, L.seatCapacity)
         FROM Reservation R
