@@ -63,23 +63,29 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     """)
     List<ReservationSeatVo> findByConcertMappingIdAndStatuses(@Param("concertMappingId") Long concertMappingId, @Param("statuses") List<ReservationStatus> statuses);
 
-    @Modifying
-    @Transactional
     @Query("""
-        UPDATE Reservation r
-        SET r.status = 'EXPIRED'
-        WHERE r.status = 'AVAILABLE'
-        AND r.availableAt < :expiryTime
-        AND r.concertMapping.concertMappingId IN (
-            SELECT cm.concertMappingId
-            FROM ConcertMapping cm
-            WHERE cm.concertDate > :currentTimestamp
-        )
-        AND r.reservationId NOT IN :lockedReservationIds
+    SELECT r.reservationId
+    FROM Reservation r
+    WHERE r.status = 'AVAILABLE'
+    AND r.availableAt < :expiryTime
+    AND r.concertMapping.concertMappingId IN (
+        SELECT cm.concertMappingId
+        FROM ConcertMapping cm
+        WHERE cm.concertDate > :currentTimestamp
+    )
     """)
-    void updateToExpiredStatus(@Param("currentTimestamp") LocalDateTime currentTimestamp,
-                               @Param("expiryTime") LocalDateTime expiryTime,
-                               @Param("lockedReservationIds") List<Long> lockedReservationIds);
+    List<Long> findReservationIdsToExpire(@Param("currentTimestamp") LocalDateTime currentTimestamp,
+                                          @Param("expiryTime") LocalDateTime expiryTime);
+
+
+    @Modifying
+    @Query("""
+    UPDATE Reservation r
+    SET r.status = 'EXPIRED'
+    WHERE r.reservationId IN :reservationIds
+    """)
+    void batchUpdateToExpiredStatus(@Param("reservationIds") List<Long> reservationIds);
+
 
     @Modifying
     @Transactional

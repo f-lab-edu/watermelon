@@ -32,11 +32,21 @@ public class ReservationCronJobService {
         // 락이 걸린 예약 ID 리스트 조회
         String lockedReservationListKey = "lockedReservationList";
         Set<String> lockedReservationIdSet = Optional.ofNullable(stringRedisTemplate.opsForSet().members(lockedReservationListKey)).orElse(Collections.emptySet());
-        List<Long> lockedReservationIds = lockedReservationIdSet.stream().map(Long::valueOf).collect(Collectors.toList());
+        List<Long> lockedReservationIds = lockedReservationIdSet.stream().map(Long::valueOf).toList();
 
-        // 예매 상태를 EXPIRED로 업데이트 (락이 걸린 예약 ID들은 제외)
-        // 추후 lockedReservationIds 사이즈가 커지는 경우 -> 반복문으로 끊기
-        reservationRepository.updateToExpiredStatus(currentTimestamp, expiryTime, lockedReservationIds);
+        // 만료될 예약 ID 조회
+        List<Long> reservationIdsToExpire = reservationRepository.findReservationIdsToExpire(currentTimestamp, expiryTime);
+
+        // lockedReservationIds 제거
+        reservationIdsToExpire.removeAll(lockedReservationIds);
+
+        // 1000개 단위로 끊어서 업데이트
+        int batchSize = 1000;
+        for (int i = 0; i < reservationIdsToExpire.size(); i += batchSize) {
+            int end = Math.min(i + batchSize, reservationIdsToExpire.size());
+            List<Long> batch = reservationIdsToExpire.subList(i, end);
+            reservationRepository.batchUpdateToExpiredStatus(batch);
+        }
 
         // 예매 테이블에서 유니크한 CONCERT_MAPPING_ID 조회 (단 공연일이 지난 것들은 제외)
         List<ConcertMappingSeatInfoVO> concertMappingSeatInfoList = reservationRepository.retrieveConcertMappingSeatCapacities(currentTimestamp);
