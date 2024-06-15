@@ -19,8 +19,13 @@ import java.util.Optional;
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     Optional<Reservation> findByMember_Email(String email);
+    Optional<Reservation> findByMember_EmailAndReservationId(String email, Long reservationId);
 
-    Optional<Reservation> findByReservationId(Long reservationId);
+    @Transactional
+    @Modifying
+    @Query("UPDATE Reservation r SET r.status = :status WHERE r.reservationId = :reservationId")
+    void updateReservationStatusByReservationId(@Param("reservationId") Long reservationId, @Param("status") ReservationStatus status);
+
 
     @Query("""
         SELECT DISTINCT new com.project.watermelon.vo.ConcertMappingSeatInfoVO(C.concertMappingId, L.seatCapacity)
@@ -70,8 +75,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             FROM ConcertMapping cm
             WHERE cm.concertDate > :currentTimestamp
         )
+        AND r.reservationId NOT IN :lockedReservationIds
     """)
-    void updateToExpiredStatus(@Param("currentTimestamp") LocalDateTime currentTimestamp, @Param("expiryTime") LocalDateTime expiryTime);
+    void updateToExpiredStatus(@Param("currentTimestamp") LocalDateTime currentTimestamp,
+                               @Param("expiryTime") LocalDateTime expiryTime,
+                               @Param("lockedReservationIds") List<Long> lockedReservationIds);
 
     @Modifying
     @Transactional

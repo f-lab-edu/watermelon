@@ -9,4 +9,5 @@ import lombok.Setter;
 @NoArgsConstructor
 public class PostPaymentRequestDto {
     private Long reservationId;
+    private Long seatId;
 }

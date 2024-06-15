@@ -5,18 +5,20 @@ import com.project.watermelon.repository.ReservationRepository;
 import com.project.watermelon.vo.ConcertMappingSeatInfoVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ReservationCronJobService {
 
+    private final StringRedisTemplate stringRedisTemplate;
     private final ReservationRepository reservationRepository;
 
     @Scheduled(cron = "0 */1 * * * *")
@@ -26,7 +28,15 @@ public class ReservationCronJobService {
         // 결제 시 reservation lock check -> 분산락 키워드 검색해보기!
         LocalDateTime currentTimestamp = LocalDateTime.now();
         LocalDateTime expiryTime = currentTimestamp.minusMinutes(10);
-        reservationRepository.updateToExpiredStatus(currentTimestamp, expiryTime);
+
+        // 락이 걸린 예약 ID 리스트 조회
+        String lockedReservationListKey = "lockedReservationList";
+        Set<String> lockedReservationIdSet = Optional.ofNullable(stringRedisTemplate.opsForSet().members(lockedReservationListKey)).orElse(Collections.emptySet());
+        List<Long> lockedReservationIds = lockedReservationIdSet.stream().map(Long::valueOf).collect(Collectors.toList());
+
+        // 예매 상태를 EXPIRED로 업데이트 (락이 걸린 예약 ID들은 제외)
+        // 추후 lockedReservationIds 사이즈가 커지는 경우 -> 반복문으로 끊기
+        reservationRepository.updateToExpiredStatus(currentTimestamp, expiryTime, lockedReservationIds);
 
         // 예매 테이블에서 유니크한 CONCERT_MAPPING_ID 조회 (단 공연일이 지난 것들은 제외)
         List<ConcertMappingSeatInfoVO> concertMappingSeatInfoList = reservationRepository.retrieveConcertMappingSeatCapacities(currentTimestamp);

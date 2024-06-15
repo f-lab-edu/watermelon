@@ -38,6 +38,16 @@ public class RestApiExceptionHandler {
         return getObjectResponseEntity(ex);
     }
 
+    @ExceptionHandler(value = { MemberIsNotOwnerOfReservationException.class })
+    public ResponseEntity<Object> handleMemberIsNotOwnerOfReservationExceptions(CustomException ex) {
+        return getObjectResponseEntity(ex);
+    }
+
+    @ExceptionHandler(value = { SeatAlreadyReservedException.class })
+    public ResponseEntity<Object> handleSeatAlreadyReservedExceptions(CustomException ex) {
+        return getObjectResponseEntity(ex);
+    }
+
     @ExceptionHandler(value = { InvalidIdException.class })
     public ResponseEntity<Object> handleInvalidIdExceptions(CustomException ex) {
         return getObjectResponseEntity(ex);
