@@ -4,6 +4,7 @@ import com.project.watermelon.dto.payment.PaymentResponseDto;
 import com.project.watermelon.enumeration.ReservationStatus;
 import com.project.watermelon.exception.InvalidIdException;
 import com.project.watermelon.exception.MemberAlreadyRequestReservationException;
+import com.project.watermelon.exception.NotAvailableStatusException;
 import com.project.watermelon.exception.SeatAlreadyReservedException;
 import com.project.watermelon.model.Reservation;
 import com.project.watermelon.model.Seat;
@@ -43,6 +44,11 @@ public class PaymentService {
             Reservation reservation = reservationRepository.findByMember_EmailAndReservationId(email, reservationId).orElseThrow(
                     () -> new MemberAlreadyRequestReservationException("The member is not the owner of this reservation: " + email)
             );
+
+            // AVAILABLE status 가 아닌 경우 예외 처리
+            if (reservation.getStatus() != ReservationStatus.AVAILABLE) {
+                throw new NotAvailableStatusException("Not available status.");
+            }
 
             // seat 조회
             Seat seat = seatRepository.findBySeatId(seatId).orElseThrow(

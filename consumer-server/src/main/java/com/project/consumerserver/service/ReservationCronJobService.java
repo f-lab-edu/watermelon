@@ -3,6 +3,7 @@ package com.project.consumerserver.service;
 import com.project.watermelon.enumeration.ReservationStatus;
 import com.project.watermelon.repository.ReservationRepository;
 import com.project.watermelon.vo.ConcertMappingSeatInfoVO;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -22,6 +23,7 @@ public class ReservationCronJobService {
     private final ReservationRepository reservationRepository;
 
     @Scheduled(cron = "0 */1 * * * *")
+    @Transactional
     public void updateReservation() {
         // 전체 전제 조건: 공연일이 현재 보다 미래인 데이터에 대해서만 수행.
         // 예매 테이블에서 AVAILABLE_AT -> 10분 지난 경우 일괄 EXPIRED 로 update

@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,13 +18,8 @@ import java.util.Optional;
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     Optional<Reservation> findByMember_Email(String email);
+
     Optional<Reservation> findByMember_EmailAndReservationId(String email, Long reservationId);
-
-    @Transactional
-    @Modifying
-    @Query("UPDATE Reservation r SET r.status = :status WHERE r.reservationId = :reservationId")
-    void updateReservationStatusByReservationId(@Param("reservationId") Long reservationId, @Param("status") ReservationStatus status);
-
 
     @Query("""
         SELECT DISTINCT new com.project.watermelon.vo.ConcertMappingSeatInfoVO(C.concertMappingId, L.seatCapacity)
@@ -88,7 +82,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
 
     @Modifying
-    @Transactional
     @Query("""
         UPDATE Reservation r
         SET r.status = 'AVAILABLE', r.availableAt = :currentTimestamp

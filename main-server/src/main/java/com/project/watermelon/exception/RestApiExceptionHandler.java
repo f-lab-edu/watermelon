@@ -48,6 +48,11 @@ public class RestApiExceptionHandler {
         return getObjectResponseEntity(ex);
     }
 
+    @ExceptionHandler(value = { NotAvailableStatusException.class })
+    public ResponseEntity<Object> handleNotAvailableStatusExceptions(CustomException ex) {
+        return getObjectResponseEntity(ex);
+    }
+
     @ExceptionHandler(value = { InvalidIdException.class })
     public ResponseEntity<Object> handleInvalidIdExceptions(CustomException ex) {
         return getObjectResponseEntity(ex);
