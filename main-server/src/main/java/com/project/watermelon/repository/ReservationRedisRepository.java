@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Repository;
 
 import java.util.concurrent.TimeUnit;
@@ -32,14 +31,14 @@ public class ReservationRedisRepository {
         stringRedisTemplate.expire(hashKey, 10, TimeUnit.MINUTES);
     }
 
-    // Lock the reservation with a TTL
+    // 예매 데이터 락 설정 (배치잡에서 EXPIRED 시키는 작업 방지)
     public void lockReservation(Long reservationId, long ttlInSeconds) {
         ValueOperations<String, String> ops = stringRedisTemplate.opsForValue();
         String key = "reservationLock:" + reservationId;
         ops.set(key, "locked", ttlInSeconds, TimeUnit.SECONDS);
     }
 
-    // Add the reservation ID to the set of locked reservations
+    // 락을 걸어둔 예매 데이터 아이디 Set 에 추가 (배치잡에서 조회용)
     public void addLockedReservationId(String key, Long reservationId) {
         stringRedisTemplate.opsForSet().add(key, reservationId.toString());
     }
