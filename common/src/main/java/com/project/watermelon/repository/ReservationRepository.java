@@ -6,6 +6,7 @@ import com.project.watermelon.model.Reservation;
 import com.project.watermelon.vo.ConcertMappingSeatInfoVO;
 import com.project.watermelon.vo.ReservationSeatVo;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -21,14 +22,16 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     Optional<Reservation> findByMember_EmailAndReservationId(String email, Long reservationId);
 
-    @Query("""
-        SELECT DISTINCT new com.project.watermelon.vo.ConcertMappingSeatInfoVO(C.concertMappingId, L.seatCapacity)
-        FROM Reservation R
-        JOIN R.concertMapping C
-        JOIN C.location L
-        WHERE C.concertDate > :currentTimestamp
-    """)
-    List<ConcertMappingSeatInfoVO> retrieveConcertMappingSeatCapacities(@Param("currentTimestamp") LocalDateTime currentTimestamp);
+//    @Query("""
+//        SELECT DISTINCT new com.project.watermelon.vo.ConcertMappingSeatInfoVO(C.concertMappingId, L.seatCapacity)
+//        FROM Reservation R
+//        JOIN R.concertMapping C
+//        JOIN C.location L
+//        WHERE C.concertDate > :currentTimestamp
+//    """)
+//    List<ConcertMappingSeatInfoVO> retrieveConcertMappingSeatCapacities(@Param("currentTimestamp") LocalDateTime currentTimestamp);
+    @EntityGraph(attributePaths = {"concertMapping", "concertMapping.location"})
+    List<Reservation> findDistinctByConcertMappingConcertDateAfter(@Param("currentTimestamp") LocalDateTime currentTimestamp);
 
     @Query("""
         SELECT r.reservationId

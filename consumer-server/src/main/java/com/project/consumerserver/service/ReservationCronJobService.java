@@ -1,6 +1,7 @@
 package com.project.consumerserver.service;
 
 import com.project.watermelon.enumeration.ReservationStatus;
+import com.project.watermelon.model.Reservation;
 import com.project.watermelon.repository.ReservationRepository;
 import com.project.watermelon.vo.ConcertMappingSeatInfoVO;
 import jakarta.transaction.Transactional;
@@ -42,7 +43,7 @@ public class ReservationCronJobService {
         // lockedReservationIds 제거
         reservationIdsToExpire.removeAll(lockedReservationIds);
 
-        // 1000개 단위로 끊어서 업데이트
+        // 1000개 단위로 끊어서 업데이트 -> 애초에 1000개씩 가져오도록 설정하는게 좋아보임
         int batchSize = 1000;
         for (int i = 0; i < reservationIdsToExpire.size(); i += batchSize) {
             int end = Math.min(i + batchSize, reservationIdsToExpire.size());
@@ -51,7 +52,13 @@ public class ReservationCronJobService {
         }
 
         // 예매 테이블에서 유니크한 CONCERT_MAPPING_ID 조회 (단 공연일이 지난 것들은 제외)
-        List<ConcertMappingSeatInfoVO> concertMappingSeatInfoList = reservationRepository.retrieveConcertMappingSeatCapacities(currentTimestamp);
+//        List<ConcertMappingSeatInfoVO> concertMappingSeatInfoList = reservationRepository.retrieveConcertMappingSeatCapacities(currentTimestamp);
+        List<Reservation> reservations = reservationRepository.findDistinctByConcertMappingConcertDateAfter(currentTimestamp);
+
+        List<ConcertMappingSeatInfoVO> concertMappingSeatInfoList = reservations.stream()
+        .map(r -> new ConcertMappingSeatInfoVO(r.getConcertMapping().getConcertMappingId(), r.getConcertMapping().getLocation().getSeatCapacity()))
+        .distinct()
+        .toList();
 
         // 해당 CONCERT_MAPPING_ID 별 예매 상태 업데이트 플로우 시작
         // 업데이트 가능한 수 = (LOCATION 의 SEAT_CAPACITY - CONCERT_MAPPING_ID 기준 AVAILABLE, RESERVED 상태인 로우 카운트)
