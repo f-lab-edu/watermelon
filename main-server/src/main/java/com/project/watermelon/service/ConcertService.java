@@ -38,7 +38,7 @@ public class ConcertService {
 
     public ConcertMappingResponseDto retrieveConcertMapping(Long concertId) {
         // 실제 콘서트 공연 리스트 조회
-        List<ConcertMapping> concertMappingList = concertMappingRepository.findByConcertIdWithDetails(concertId);
+        List<ConcertMapping> concertMappingList = concertMappingRepository.findByConcert_ConcertId(concertId);
 
         List<ConcertMappingVo> concertMappingVoList = concertMappingList.stream()
             .map(concertMapping -> {

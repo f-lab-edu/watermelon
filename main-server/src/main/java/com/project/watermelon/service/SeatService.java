@@ -31,12 +31,21 @@ public class SeatService {
 
         // 결제 진행 중 및 완료된 좌석 조회 -> 결제 불가한 좌석
         List<ReservationStatus> notAvailableReservationStatusList = List.of(ReservationStatus.AVAILABLE, ReservationStatus.RESERVED);
-        List<Long> notAvailableSeatIdList = reservationRepository
-                .findByConcertMappingIdAndStatuses(concertMappingId, notAvailableReservationStatusList)
+//        List<Long> notAvailableSeatIdList = reservationRepository
+//                .findByConcertMappingIdAndStatuses(concertMappingId, notAvailableReservationStatusList)
+//                .stream()
+//                .map(
+//                        ReservationSeatVo::getSeatId
+//                ).toList();
+        List<ReservationSeatVo> reservationSeatVos = reservationRepository.findByConcertMappingConcertMappingIdAndStatusIn(
+                concertMappingId, notAvailableReservationStatusList)
                 .stream()
-                .map(
-                        ReservationSeatVo::getSeatId
-                ).toList();
+                .map(reservation -> new ReservationSeatVo(
+                        reservation.getReservationId(),
+                        reservation.getTicket().getTicketId(),
+                        reservation.getTicket().getSeat().getSeatId()))
+                .toList();
+        List<Long> notAvailableSeatIdList = reservationSeatVos.stream().map(ReservationSeatVo::getSeatId).toList();
 
         // 전체 좌석 조회 후 stream 으로 가용 여부 판단
         List<SeatVo> seatVoList = seatRepository.findAllByLocation_LocationId(concertMapping.getLocation().getLocationId())

@@ -1,6 +1,5 @@
 package com.project.watermelon.model;
 
-import com.project.watermelon.enumeration.MemberRole;
 import com.project.watermelon.util.Timestamped;
 import jakarta.persistence.*;
 import lombok.Builder;

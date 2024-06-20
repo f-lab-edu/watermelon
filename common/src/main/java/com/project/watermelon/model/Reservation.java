@@ -23,8 +23,8 @@ public class Reservation extends Timestamped {
     @Id
     private Long reservationId;
 
-    @Column()
-    private Long ticketId;
+//    @Column()
+//    private Long ticketId;
 
     @Column(nullable = false)
     private Long reservationRank;
@@ -45,11 +45,23 @@ public class Reservation extends Timestamped {
     @JoinColumn(name = "memberId", nullable = false)
     private Member member;
 
+    @OneToOne
+    @JoinColumn(name = "ticketId")
+    private Ticket ticket;
+
     @Builder
     public Reservation(Long reservationRank, ReservationStatus status, ConcertMapping concertMapping, Member member) {
         this.reservationRank = reservationRank;
         this.status = status;
         this.concertMapping = concertMapping;
         this.member = member;
+    }
+
+    public void updateReservationStatusAvailable(LocalDateTime currentTimestamp) {
+        this.status = ReservationStatus.AVAILABLE;
+        this.availableAt = currentTimestamp;
+    }
+    public void updateReservationStatusExpire() {
+        this.status = ReservationStatus.EXPIRED;
     }
 }

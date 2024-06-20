@@ -63,7 +63,8 @@ public class PaymentService {
             // ticket 생성 및 reservation status 업데이트
             Ticket ticket = Ticket.builder().concertMapping(reservation.getConcertMapping()).seat(seat).build();
             ticketRepository.save(ticket);
-            reservation.setStatus(ReservationStatus.RESERVED); // Update the reservation status directly
+            reservation.setStatus(ReservationStatus.RESERVED);// Update the reservation status directly
+            reservation.setTicket(ticket);// assign ticket
             reservationRepository.save(reservation); // Persist the change
 
             // 예매 (결제) 성공 시 해당 내역 return

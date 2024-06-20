@@ -30,66 +30,77 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 //        WHERE C.concertDate > :currentTimestamp
 //    """)
 //    List<ConcertMappingSeatInfoVO> retrieveConcertMappingSeatCapacities(@Param("currentTimestamp") LocalDateTime currentTimestamp);
+    // @EntityGraph 를 통해 fetch join -> N+1 문제 방지
     @EntityGraph(attributePaths = {"concertMapping", "concertMapping.location"})
     List<Reservation> findDistinctByConcertMappingConcertDateAfter(@Param("currentTimestamp") LocalDateTime currentTimestamp);
 
-    @Query("""
-        SELECT r.reservationId
-        FROM Reservation r
-        WHERE r.concertMapping.concertMappingId = :concertMappingId
-        AND r.status = 'WAIT'
-        ORDER BY r.reservationRank
-    """)
-    List<Long> findReservationIdsForUpdate(@Param("concertMappingId") Long concertMappingId, Pageable pageable);
-
-    @Query("""
-        SELECT COUNT(*)
-        FROM Reservation R
-        WHERE R.status IN :statuses
-        AND R.concertMapping.concertMappingId = :concertMappingId
-    """)
-    Long retrieveAvailableOrReservedCount(@Param("concertMappingId") Long concertMappingId, @Param("statuses") List<ReservationStatus> statuses);
-
-    @Query("""
-        SELECT new com.project.watermelon.vo.ReservationSeatVo(R.reservationId, T.ticketId, T.seat.seatId)
-        FROM Reservation R
-        JOIN Ticket T
-        ON R.ticketId = T.ticketId
-        WHERE R.concertMapping.concertMappingId = :concertMappingId
-        AND R.status IN :statuses
-    """)
-    List<ReservationSeatVo> findByConcertMappingIdAndStatuses(@Param("concertMappingId") Long concertMappingId, @Param("statuses") List<ReservationStatus> statuses);
-
-    @Query("""
-    SELECT r.reservationId
-    FROM Reservation r
-    WHERE r.status = 'AVAILABLE'
-    AND r.availableAt < :expiryTime
-    AND r.concertMapping.concertMappingId IN (
-        SELECT cm.concertMappingId
-        FROM ConcertMapping cm
-        WHERE cm.concertDate > :currentTimestamp
-    )
-    """)
-    List<Long> findReservationIdsToExpire(@Param("currentTimestamp") LocalDateTime currentTimestamp,
-                                          @Param("expiryTime") LocalDateTime expiryTime);
+//    @Query("""
+//        SELECT r.reservationId
+//        FROM Reservation r
+//        WHERE r.concertMapping.concertMappingId = :concertMappingId
+//        AND r.status = 'WAIT'
+//        ORDER BY r.reservationRank
+//    """)
+//    List<Long> findReservationIdsForUpdate(@Param("concertMappingId") Long concertMappingId, Pageable pageable);
+    List<Reservation> findByConcertMappingConcertMappingIdAndStatusOrderByReservationRank(Long concertMappingId, ReservationStatus status, Pageable pageable);
 
 
-    @Modifying
-    @Query("""
-    UPDATE Reservation r
-    SET r.status = 'EXPIRED'
-    WHERE r.reservationId IN :reservationIds
-    """)
-    void batchUpdateToExpiredStatus(@Param("reservationIds") List<Long> reservationIds);
+    //    @Query("""
+//        SELECT COUNT(*)
+//        FROM Reservation R
+//        WHERE R.status IN :statuses
+//        AND R.concertMapping.concertMappingId = :concertMappingId
+//    """)
+//    Long retrieveAvailableOrReservedCount(@Param("concertMappingId") Long concertMappingId, @Param("statuses") List<ReservationStatus> statuses);
+    Long countByStatusInAndConcertMappingConcertMappingId(List<ReservationStatus> statuses, Long concertMappingId);
 
 
-    @Modifying
-    @Query("""
-        UPDATE Reservation r
-        SET r.status = 'AVAILABLE', r.availableAt = :currentTimestamp
-        WHERE r.reservationId IN :reservationIdList
-    """)
-    void updateReservationStatus(@Param("reservationIdList") List<Long> reservationIdList, @Param("currentTimestamp") LocalDateTime currentTimestamp);
+//    @Query("""
+//        SELECT new com.project.watermelon.vo.ReservationSeatVo(R.reservationId, T.ticketId, T.seat.seatId)
+//        FROM Reservation R
+//        JOIN Ticket T
+//        ON R.ticketId = T.ticketId
+//        WHERE R.concertMapping.concertMappingId = :concertMappingId
+//        AND R.status IN :statuses
+//    """)
+//    List<ReservationSeatVo> findByConcertMappingIdAndStatuses(@Param("concertMappingId") Long concertMappingId, @Param("statuses") List<ReservationStatus> statuses);
+    @EntityGraph(attributePaths = {"concertMapping", "ticket", "ticket.seat"})
+    List<Reservation> findByConcertMappingConcertMappingIdAndStatusIn(@Param("concertMappingId") Long concertMappingId, @Param("statuses") List<ReservationStatus> statuses);
+
+
+    //    @Query("""
+//    SELECT r.reservationId
+//    FROM Reservation r
+//    WHERE r.status = 'AVAILABLE'
+//    AND r.availableAt < :expiryTime
+//    AND r.concertMapping.concertMappingId IN (
+//        SELECT cm.concertMappingId
+//        FROM ConcertMapping cm
+//        WHERE cm.concertDate > :currentTimestamp
+//    )
+//    """)
+//    List<Long> findReservationIdsToExpire(@Param("currentTimestamp") LocalDateTime currentTimestamp,
+//                                          @Param("expiryTime") LocalDateTime expiryTime);
+    List<Reservation> findByStatusAndAvailableAtBeforeAndConcertMappingConcertMappingIdIn(
+            ReservationStatus status, LocalDateTime expiryTime, List<Long> concertMappingIds, Pageable pageable);
+
+
+
+//    @Modifying
+//    @Query("""
+//    UPDATE Reservation r
+//    SET r.status = 'EXPIRED'
+//    WHERE r.reservationId IN :reservationIds
+//    """)
+//    void batchUpdateToExpiredStatus(@Param("reservationIds") List<Long> reservationIds);
+//
+//
+//    @Modifying
+//    @Query("""
+//    UPDATE Reservation r
+//    SET r.status = 'AVAILABLE', r.availableAt = :currentTimestamp
+//    WHERE r.reservationId IN :reservationIdList
+//    """)
+//    void updateReservationStatus(@Param("reservationIdList") List<Long> reservationIdList, @Param("currentTimestamp") LocalDateTime currentTimestamp);
 }
 

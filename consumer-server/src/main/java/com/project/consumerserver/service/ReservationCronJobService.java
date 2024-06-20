@@ -1,7 +1,9 @@
 package com.project.consumerserver.service;
 
 import com.project.watermelon.enumeration.ReservationStatus;
+import com.project.watermelon.model.ConcertMapping;
 import com.project.watermelon.model.Reservation;
+import com.project.watermelon.repository.ConcertMappingRepository;
 import com.project.watermelon.repository.ReservationRepository;
 import com.project.watermelon.vo.ConcertMappingSeatInfoVO;
 import jakarta.transaction.Transactional;
@@ -22,6 +24,7 @@ public class ReservationCronJobService {
 
     private final StringRedisTemplate stringRedisTemplate;
     private final ReservationRepository reservationRepository;
+    private final ConcertMappingRepository concertMappingRepository;
 
     @Scheduled(cron = "0 */1 * * * *")
     @Transactional
@@ -35,26 +38,28 @@ public class ReservationCronJobService {
         // 락이 걸린 예약 ID 리스트 조회
         String lockedReservationListKey = "lockedReservationList";
         Set<String> lockedReservationIdSet = Optional.ofNullable(stringRedisTemplate.opsForSet().members(lockedReservationListKey)).orElse(Collections.emptySet());
-        List<Long> lockedReservationIds = lockedReservationIdSet.stream().map(Long::valueOf).toList();
+        Set<Long> lockedReservationIds = lockedReservationIdSet.stream().map(Long::valueOf).collect(Collectors.toSet());
 
-        // 만료될 예약 ID 조회
-        List<Long> reservationIdsToExpire = reservationRepository.findReservationIdsToExpire(currentTimestamp, expiryTime);
+        // 만료될 예약 데이터 조회
+        List<Long> concertMappingIds = concertMappingRepository.findByConcertDateAfter(currentTimestamp).stream()
+                .map(ConcertMapping::getConcertMappingId)
+                .collect(Collectors.toList());
 
-        // lockedReservationIds 제거
-        reservationIdsToExpire.removeAll(lockedReservationIds);
+        // pageable 을 통해 1000개 씩 조회
+        Pageable expiredPageable = PageRequest.of(0, 1000);
+        List<Reservation> reservationToExpire = reservationRepository.findByStatusAndAvailableAtBeforeAndConcertMappingConcertMappingIdIn(
+                ReservationStatus.AVAILABLE, expiryTime, concertMappingIds, expiredPageable);
+        // lockedReservationIds 에 해당하는 예약 데이터 제거
+        List<Reservation> filteredReservationsToExpire = reservationToExpire.stream()
+                .filter(reservation -> !lockedReservationIds.contains(reservation.getReservationId()))
+                .toList();
 
-        // 1000개 단위로 끊어서 업데이트 -> 애초에 1000개씩 가져오도록 설정하는게 좋아보임
-        int batchSize = 1000;
-        for (int i = 0; i < reservationIdsToExpire.size(); i += batchSize) {
-            int end = Math.min(i + batchSize, reservationIdsToExpire.size());
-            List<Long> batch = reservationIdsToExpire.subList(i, end);
-            reservationRepository.batchUpdateToExpiredStatus(batch);
-        }
+        // 예약 EXPIRED 상태로 업데이트
+        filteredReservationsToExpire.forEach(Reservation::updateReservationStatusExpire);
+        reservationRepository.saveAll(filteredReservationsToExpire);
 
         // 예매 테이블에서 유니크한 CONCERT_MAPPING_ID 조회 (단 공연일이 지난 것들은 제외)
-//        List<ConcertMappingSeatInfoVO> concertMappingSeatInfoList = reservationRepository.retrieveConcertMappingSeatCapacities(currentTimestamp);
         List<Reservation> reservations = reservationRepository.findDistinctByConcertMappingConcertDateAfter(currentTimestamp);
-
         List<ConcertMappingSeatInfoVO> concertMappingSeatInfoList = reservations.stream()
         .map(r -> new ConcertMappingSeatInfoVO(r.getConcertMapping().getConcertMappingId(), r.getConcertMapping().getLocation().getSeatCapacity()))
         .distinct()
@@ -67,18 +72,18 @@ public class ReservationCronJobService {
             Long targetSeatCapacity = concertMappingSeatInfo.getSeatCapacity();
             List<ReservationStatus> statuses = Arrays.asList(ReservationStatus.AVAILABLE, ReservationStatus.RESERVED);
 
-            Long availableOrReservedCount = reservationRepository.retrieveAvailableOrReservedCount(targetConcertMappingId, statuses);
+            Long availableOrReservedCount = reservationRepository.countByStatusInAndConcertMappingConcertMappingId(
+                    statuses, targetConcertMappingId);
             long updateCount = (targetSeatCapacity - availableOrReservedCount);
             int updateCountInt = Math.toIntExact(updateCount);
 
-            // 1. 예약 ID를 페이징을 사용하여 가져옴
-            Pageable pageable = PageRequest.of(0, updateCountInt);
-            List<Long> reservationIdList = reservationRepository.findReservationIdsForUpdate(targetConcertMappingId, pageable);
-
-            // 2. 가져온 예약 ID를 사용하여 상태 업데이트
-            if (!reservationIdList.isEmpty()) {
-                reservationRepository.updateReservationStatus(reservationIdList, currentTimestamp);
-            }
+            // 예약 데이터를 페이징을 사용하여 조회
+            Pageable availablePageable = PageRequest.of(0, updateCountInt);
+            List<Reservation> reservationsToAvailable = reservationRepository.findByConcertMappingConcertMappingIdAndStatusOrderByReservationRank(
+                    targetConcertMappingId, ReservationStatus.WAIT, availablePageable);
+            // AVAILABLE status 로 업데이트
+            reservationsToAvailable.forEach(reservation -> reservation.updateReservationStatusAvailable(currentTimestamp));
+            reservationRepository.saveAll(reservationsToAvailable);
         }
     }
 }
