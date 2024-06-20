@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SeatRepository extends JpaRepository<Seat, Long> {
-    @EntityGraph(attributePaths = {"location", "ticket"})
+    @EntityGraph(attributePaths = {"location"})
     List<Seat> findAllByLocation_LocationId(Long locationId);
 
     Optional<Seat> findBySeatId(Long seatId);

@@ -32,8 +32,5 @@ public class Seat extends Timestamped {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "locationId", nullable = false)
     private Location location;
-
-    @OneToOne(mappedBy = "seat", fetch = FetchType.LAZY)
-    private Ticket ticket;
 }
 
