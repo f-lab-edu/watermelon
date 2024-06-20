@@ -4,6 +4,7 @@ import com.project.watermelon.dto.seat.SeatListResponseDto;
 import com.project.watermelon.enumeration.ReservationStatus;
 import com.project.watermelon.exception.InvalidIdException;
 import com.project.watermelon.model.ConcertMapping;
+import com.project.watermelon.model.Reservation;
 import com.project.watermelon.repository.ConcertMappingRepository;
 import com.project.watermelon.repository.ReservationRepository;
 import com.project.watermelon.repository.SeatRepository;
@@ -31,15 +32,10 @@ public class SeatService {
 
         // 결제 진행 중 및 완료된 좌석 조회 -> 결제 불가한 좌석
         List<ReservationStatus> notAvailableReservationStatusList = List.of(ReservationStatus.AVAILABLE, ReservationStatus.RESERVED);
-//        List<Long> notAvailableSeatIdList = reservationRepository
-//                .findByConcertMappingIdAndStatuses(concertMappingId, notAvailableReservationStatusList)
-//                .stream()
-//                .map(
-//                        ReservationSeatVo::getSeatId
-//                ).toList();
         List<ReservationSeatVo> reservationSeatVos = reservationRepository.findByConcertMappingConcertMappingIdAndStatusIn(
-                concertMappingId, notAvailableReservationStatusList)
+                        concertMappingId, notAvailableReservationStatusList)
                 .stream()
+                .filter(reservation -> reservation.getTicket() != null)
                 .map(reservation -> new ReservationSeatVo(
                         reservation.getReservationId(),
                         reservation.getTicket().getTicketId(),
