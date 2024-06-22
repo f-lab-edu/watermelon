@@ -1,6 +1,5 @@
 package com.project.watermelon.model;
 
-import com.project.watermelon.enumeration.MemberRole;
 import com.project.watermelon.enumeration.ReservationStatus;
 import com.project.watermelon.util.Timestamped;
 import jakarta.persistence.*;
@@ -8,6 +7,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @Getter
@@ -21,12 +23,19 @@ public class Reservation extends Timestamped {
     @Id
     private Long reservationId;
 
+    @Column()
+    private Long ticketId;
+
     @Column(nullable = false)
     private Long reservationRank;
 
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
     private ReservationStatus status = ReservationStatus.WAIT;
+
+    @Column()
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    private LocalDateTime availableAt;
 
     @ManyToOne
     @JoinColumn(name = "concertMappingId", nullable = false)

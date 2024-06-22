@@ -1,4 +1,4 @@
 rootProject.name = 'watermelon'
 include 'main-server'
 include 'consumer-server'
-include 'common-entity'
+include 'common'

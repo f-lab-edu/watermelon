@@ -1,6 +1,5 @@
 package com.project.watermelon.model;
 
-import com.project.watermelon.enumeration.PurchaseStatus;
 import com.project.watermelon.util.Timestamped;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -14,28 +13,28 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-public class Purchase extends Timestamped {
+@Table(name = "CONCERT_MAPPING")
+public class ConcertMapping extends Timestamped {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private Long purchaseId;
+    private Long concertMappingId;
 
     @Column(nullable = false)
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    private LocalDateTime purchaseDate;
+    private LocalDateTime concertDate;
 
     @Column(nullable = false)
-    private Long price;
+    private String startTime;
 
-    @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
-    private PurchaseStatus purchaseStatus = PurchaseStatus.PROGRESS;
-
-    @OneToOne
-    @JoinColumn(name="ticketId", nullable = false)
-    private Ticket ticket;
+    private String endTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "memberId", nullable = false)
-    private Member member;
+    @JoinColumn(name = "concertId", nullable = false)
+    private Concert concert;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "locationId", nullable = false)
+    private Location location;
 }
 
