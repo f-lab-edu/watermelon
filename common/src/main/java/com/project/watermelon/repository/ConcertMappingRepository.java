@@ -14,8 +14,6 @@ import java.util.Optional;
 public interface ConcertMappingRepository extends JpaRepository<ConcertMapping, Long> {
     Optional<ConcertMapping> findConcertMappingByConcertMappingId(Long concertMappingId);
 
-//    @Query("SELECT m FROM ConcertMapping m JOIN m.concert c JOIN m.location l WHERE c.concertId = :concertId")
-//    List<ConcertMapping> findByConcertIdWithDetails(@Param("concertId") Long concertId);
     @EntityGraph(attributePaths = {"concert", "location"})
     List<ConcertMapping> findByConcert_ConcertId(Long concertId);
 
