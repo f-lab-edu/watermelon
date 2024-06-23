@@ -29,11 +29,8 @@ public class Seat extends Timestamped {
     @Column(nullable = false)
     private SeatStatus status = SeatStatus.AVAILABLE;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "locationId", nullable = false)
     private Location location;
-
-    @OneToOne(mappedBy = "seat")
-    private Ticket ticket;
 }
 

@@ -23,9 +23,6 @@ public class Reservation extends Timestamped {
     @Id
     private Long reservationId;
 
-    @Column()
-    private Long ticketId;
-
     @Column(nullable = false)
     private Long reservationRank;
 
@@ -37,13 +34,17 @@ public class Reservation extends Timestamped {
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime availableAt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "concertMappingId", nullable = false)
     private ConcertMapping concertMapping;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memberId", nullable = false)
     private Member member;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ticketId")
+    private Ticket ticket;
 
     @Builder
     public Reservation(Long reservationRank, ReservationStatus status, ConcertMapping concertMapping, Member member) {
@@ -51,5 +52,13 @@ public class Reservation extends Timestamped {
         this.status = status;
         this.concertMapping = concertMapping;
         this.member = member;
+    }
+
+    public void updateReservationStatusAvailable(LocalDateTime currentTimestamp) {
+        this.status = ReservationStatus.AVAILABLE;
+        this.availableAt = currentTimestamp;
+    }
+    public void updateReservationStatusExpire() {
+        this.status = ReservationStatus.EXPIRED;
     }
 }

@@ -21,3 +21,6 @@ common/gradlew.bat
 # IntelliJ IDEA files
 .idea/
 seat_data.json
+
+# log
+logs

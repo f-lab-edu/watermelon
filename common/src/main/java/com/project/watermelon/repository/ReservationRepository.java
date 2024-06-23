@@ -3,65 +3,37 @@ package com.project.watermelon.repository;
 
 import com.project.watermelon.enumeration.ReservationStatus;
 import com.project.watermelon.model.Reservation;
-import com.project.watermelon.vo.ConcertMappingSeatInfoVO;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+
     Optional<Reservation> findByMember_Email(String email);
 
-    @Query("""
-        SELECT DISTINCT new com.project.watermelon.vo.ConcertMappingSeatInfoVO(C.concertMappingId, L.seatCapacity)
-        FROM Reservation R
-        JOIN R.concertMapping C
-        JOIN C.location L
-        WHERE C.concertDate > CURRENT_TIMESTAMP
-    """)
-    List<ConcertMappingSeatInfoVO> retrieveConcertMappingSeatCapacities();
+    Optional<Reservation> findByMember_EmailAndReservationId(String email, Long reservationId);
 
-    @Transactional
-    @Modifying
-    @Query(value = """
-        UPDATE RESERVATION R
-        JOIN CONCERT_MAPPING CM
-        ON R.CONCERT_MAPPING_ID = CM.CONCERT_MAPPING_ID
-        AND CM.CONCERT_DATE > NOW()
-        SET R.STATUS = 'EXPIRED'
-        WHERE R.STATUS = 'AVAILABLE'
-        AND R.AVAILABLE_AT < NOW() - INTERVAL 10 MINUTE
-    """, nativeQuery = true)
-    void updateToExpiredStatus();
+    // @EntityGraph 를 통해 fetch join -> N+1 문제 방지
+    @EntityGraph(attributePaths = {"concertMapping", "concertMapping.location"})
+    List<Reservation> findDistinctByConcertMappingConcertDateAfter(@Param("currentTimestamp") LocalDateTime currentTimestamp);
 
-    @Query("""
-        SELECT COUNT(*)
-        FROM Reservation R
-        WHERE R.status IN :statuses
-        AND R.concertMapping.concertMappingId = :concertMappingId
-    """)
-    Long retrieveAvailableOrReservedCount(@Param("concertMappingId") Long concertMappingId, @Param("statuses") List<ReservationStatus> statuses);
+    List<Reservation> findByConcertMappingConcertMappingIdAndStatusOrderByReservationRank(Long concertMappingId, ReservationStatus status, Pageable pageable);
 
 
-    @Transactional
-    @Modifying
-    @Query(value = """
-        UPDATE RESERVATION R
-        JOIN (
-            SELECT RESERVATION_ID
-            FROM RESERVATION
-            WHERE CONCERT_MAPPING_ID = :concertMappingId AND STATUS = 'WAIT'
-            ORDER BY RESERVATION_RANK
-            LIMIT :count
-        ) subquery
-        ON R.RESERVATION_ID = subquery.RESERVATION_ID
-        SET
-            R.STATUS = 'AVAILABLE',
-            R.AVAILABLE_AT = NOW()
-    """, nativeQuery = true)
-    void updateReservationStatus(@Param("concertMappingId") Long concertMappingId, @Param("count") Long count);
+    Long countByStatusInAndConcertMappingConcertMappingId(List<ReservationStatus> statuses, Long concertMappingId);
+
+
+    @EntityGraph(attributePaths = {"concertMapping", "ticket", "ticket.seat"})
+    List<Reservation> findByConcertMappingConcertMappingIdAndStatusIn(@Param("concertMappingId") Long concertMappingId, @Param("statuses") List<ReservationStatus> statuses);
+
+
+    List<Reservation> findByStatusAndAvailableAtBeforeAndConcertMappingConcertMappingIdIn(
+            ReservationStatus status, LocalDateTime expiryTime, List<Long> concertMappingIds, Pageable pageable);
+
 }
+

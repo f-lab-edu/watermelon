@@ -9,9 +9,16 @@ import com.project.watermelon.model.Reservation;
 import com.project.watermelon.repository.ConcertMappingRepository;
 import com.project.watermelon.repository.MemberRepository;
 import com.project.watermelon.repository.ReservationRepository;
+import com.project.watermelon.vo.ConcertMappingSeatInfoVO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +28,32 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationRedisRepository reservationRedisRepository;
     private final ConcertMappingRepository concertMappingRepository;
+
+    @Transactional
+    public void updateReservationsToExpired(List<Reservation> reservationsToExpire) {
+        reservationsToExpire.forEach(Reservation::updateReservationStatusExpire);
+        reservationRepository.saveAll(reservationsToExpire);
+    }
+
+    @Transactional
+    public void updateReservationStatus(List<ConcertMappingSeatInfoVO> concertMappingSeatInfoList, LocalDateTime currentTimestamp) {
+        for (ConcertMappingSeatInfoVO concertMappingSeatInfo : concertMappingSeatInfoList) {
+            Long targetConcertMappingId = concertMappingSeatInfo.getConcertMappingId();
+            Long targetSeatCapacity = concertMappingSeatInfo.getSeatCapacity();
+            List<ReservationStatus> statuses = Arrays.asList(ReservationStatus.AVAILABLE, ReservationStatus.RESERVED);
+
+            Long availableOrReservedCount = reservationRepository.countByStatusInAndConcertMappingConcertMappingId(
+                    statuses, targetConcertMappingId);
+            long updateCount = (targetSeatCapacity - availableOrReservedCount);
+            int updateCountInt = Math.toIntExact(updateCount);
+
+            Pageable availablePageable = PageRequest.of(0, updateCountInt);
+            List<Reservation> reservationsToAvailable = reservationRepository.findByConcertMappingConcertMappingIdAndStatusOrderByReservationRank(
+                    targetConcertMappingId, ReservationStatus.WAIT, availablePageable);
+            reservationsToAvailable.forEach(reservation -> reservation.updateReservationStatusAvailable(currentTimestamp));
+            reservationRepository.saveAll(reservationsToAvailable);
+        }
+    }
 
     @Transactional
     public boolean processMessage(ReservationMessage message) {

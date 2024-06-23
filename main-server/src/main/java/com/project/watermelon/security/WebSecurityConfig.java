@@ -54,6 +54,7 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/webapp/resources/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/concerts/**").permitAll()
                         .requestMatchers("/reservations/*").hasAnyAuthority(MemberRole.MEMBER.getAuthority())
+                        .requestMatchers("/payments/*").hasAnyAuthority(MemberRole.MEMBER.getAuthority())
                         .anyRequest().hasAuthority(MemberRole.QUALIFIED_MEMBER.getAuthority()))
 
                 .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
