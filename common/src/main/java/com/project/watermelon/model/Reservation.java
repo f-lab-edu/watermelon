@@ -23,9 +23,6 @@ public class Reservation extends Timestamped {
     @Id
     private Long reservationId;
 
-//    @Column()
-//    private Long ticketId;
-
     @Column(nullable = false)
     private Long reservationRank;
 
