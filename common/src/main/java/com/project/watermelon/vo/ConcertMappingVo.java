@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@Builder
 public class ConcertMappingVo {
     private Long concertMappingId;
     private Long concertId;
@@ -19,27 +20,4 @@ public class ConcertMappingVo {
     private String startTime;
     private String endTime;
     private String locationName;
-
-    @Builder
-    public ConcertMappingVo(
-            Long concertMappingId,
-            Long concertId,
-            Long locationId,
-            String title,
-            String genre,
-            LocalDateTime concertDate,
-            String startTime,
-            String endTime,
-            String locationName
-    ) {
-        this.concertMappingId = concertMappingId;
-        this.concertId = concertId;
-        this.locationId = locationId;
-        this.title = title;
-        this.genre = genre;
-        this.concertDate = concertDate;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.locationName = locationName;
-    }
 }
