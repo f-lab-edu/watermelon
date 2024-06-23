@@ -12,6 +12,9 @@ import com.project.watermelon.vo.ConcertMappingResponseVo;
 import com.project.watermelon.vo.ConcertMappingVo;
 import com.project.watermelon.vo.ConcertVo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,9 +26,10 @@ public class ConcertService {
     private final ConcertRepository concertRepository;
     private final ConcertMappingRepository concertMappingRepository;
 
-    public ConcertListResponseDto retrieveConcertList() {
-        // 전체 콘서트 리스트 조회
-        List<ConcertVo> concertVoList = concertRepository.findAll().stream()
+    public ConcertListResponseDto retrieveConcertList(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Concert> concertPage = concertRepository.findAllByOrderByCreatedAtDesc(pageable);
+        List<ConcertVo> concertVoList = concertPage.stream()
                 .map(concert -> ConcertVo.builder()
                         .concertId(concert.getConcertId())
                         .title(concert.getTitle())
@@ -33,7 +37,7 @@ public class ConcertService {
                         .build())
                 .collect(Collectors.toList());
         ConcertListVo concertListResponse = new ConcertListVo(concertVoList);
-        return new ConcertListResponseDto(concertListResponse);
+        return new ConcertListResponseDto(concertListResponse, concertPage.getTotalPages(), concertPage.getTotalElements());
     }
 
     public ConcertMappingResponseDto retrieveConcertMapping(Long concertId) {
