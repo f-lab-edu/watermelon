@@ -1,5 +1,6 @@
 package com.project.watermelon.service;
 
+import com.project.watermelon.annotation.RedisLock;
 import com.project.watermelon.dto.payment.PaymentResponseDto;
 import com.project.watermelon.enumeration.ReservationStatus;
 import com.project.watermelon.exception.InvalidIdException;
@@ -31,12 +32,7 @@ public class PaymentService {
     private final ReservationRepository reservationRepository;
     private final ReservationRedisRepository reservationRedisRepository;
 
-    public void lockReservation(Long reservationId) {
-        String lockedReservationListKey = "lockedReservationList";
-        reservationRedisRepository.lockReservation(reservationId, 600);
-        reservationRedisRepository.addLockedReservationId(lockedReservationListKey, reservationId);
-    }
-
+    @RedisLock
     @Transactional
     public PaymentResponseDto processPayment(String email, Long reservationId, Long seatId) {
         try {
