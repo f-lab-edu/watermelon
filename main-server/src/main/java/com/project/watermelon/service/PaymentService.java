@@ -32,7 +32,7 @@ public class PaymentService {
     private final ReservationRepository reservationRepository;
     private final ReservationRedisRepository reservationRedisRepository;
 
-    @RedisLock
+    @RedisLock(key="#reservationId")
     @Transactional
     public PaymentResponseDto processPayment(String email, Long reservationId, Long seatId) {
         try {
