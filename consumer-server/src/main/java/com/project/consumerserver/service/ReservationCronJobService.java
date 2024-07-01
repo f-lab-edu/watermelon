@@ -8,24 +8,21 @@ import com.project.watermelon.repository.ReservationRepository;
 import com.project.watermelon.vo.ConcertMappingSeatInfoVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ReservationCronJobService {
-
-    private static final String LOCKED_RESERVATION_LIST_KEY = "lockedReservationList";
     private static final int PAGE_SIZE = 1000;
     private static final int EXPIRY_MINUTES = 10;
+    private static final int REDIS_TTL_SECONDS = 300;
 
-    private final StringRedisTemplate stringRedisTemplate;
     private final ReservationRepository reservationRepository;
     private final ConcertMappingRepository concertMappingRepository;
     private final ReservationService reservationService;
@@ -36,22 +33,16 @@ public class ReservationCronJobService {
         LocalDateTime currentTimestamp = LocalDateTime.now();
         LocalDateTime expiryTime = currentTimestamp.minusMinutes(EXPIRY_MINUTES);
 
-        // reservation lock 이 걸려있는 Reservation 목록 id 조회
-        Set<Long> lockedReservationIds = getLockedReservationIds();
         // 아직 실행되지 않은 ConcertMapping 목록 조회
         List<Long> concertMappingIds = getFutureConcertMappingIds(currentTimestamp);
+        // 10 분이 지난 status = AVAILABLE 인 Reservation 조회
+        List<Reservation> reservationsToExpire = getReservationsToExpire(expiryTime, concertMappingIds);
+        // reservation service 에 분산락 기반 EXPIRED 업데이트 작업 위임
+        reservationService.updateReservationsToExpired(reservationsToExpire, REDIS_TTL_SECONDS);
 
-        // reservation lock 이 걸려있지 않은 Reservation 중 조건 충족하는 객체 상태 EXPIRED 로 업데이트
-        List<Reservation> filteredReservationsToExpire = getFilteredReservationsToExpire(expiryTime, concertMappingIds, lockedReservationIds);
-        reservationService.updateReservationsToExpired(filteredReservationsToExpire);
-
+        // 실제 공연 단위인 concertMapping 을 기준으로 reservation status AVAILABLE 업데이트 진행
         List<ConcertMappingSeatInfoVO> concertMappingSeatInfoList = getUniqueConcertMappingSeatInfo(currentTimestamp);
-        reservationService.updateReservationStatus(concertMappingSeatInfoList, currentTimestamp);
-    }
-
-    private Set<Long> getLockedReservationIds() {
-        Set<String> lockedReservationIdSet = Optional.ofNullable(stringRedisTemplate.opsForSet().members(LOCKED_RESERVATION_LIST_KEY)).orElse(Collections.emptySet());
-        return lockedReservationIdSet.stream().map(Long::valueOf).collect(Collectors.toSet());
+        reservationService.updateReservationToAvailable(concertMappingSeatInfoList, currentTimestamp);
     }
 
     private List<Long> getFutureConcertMappingIds(LocalDateTime currentTimestamp) {
@@ -60,19 +51,21 @@ public class ReservationCronJobService {
                 .collect(Collectors.toList());
     }
 
-    private List<Reservation> getFilteredReservationsToExpire(LocalDateTime expiryTime, List<Long> concertMappingIds, Set<Long> lockedReservationIds) {
+    private List<Reservation> getReservationsToExpire(LocalDateTime expiryTime, List<Long> concertMappingIds) {
         Pageable expiredPageable = PageRequest.of(0, PAGE_SIZE);
-        List<Reservation> reservationToExpire = reservationRepository.findByStatusAndAvailableAtBeforeAndConcertMappingConcertMappingIdIn(
+        return reservationRepository.findByStatusAndAvailableAtBeforeAndConcertMappingConcertMappingIdIn(
                 ReservationStatus.AVAILABLE, expiryTime, concertMappingIds, expiredPageable);
-        return reservationToExpire.stream()
-                .filter(reservation -> !lockedReservationIds.contains(reservation.getReservationId()))
-                .toList();
     }
 
     private List<ConcertMappingSeatInfoVO> getUniqueConcertMappingSeatInfo(LocalDateTime currentTimestamp) {
         List<Reservation> reservations = reservationRepository.findDistinctByConcertMappingConcertDateAfter(currentTimestamp);
         return reservations.stream()
-                .map(r -> new ConcertMappingSeatInfoVO(r.getConcertMapping().getConcertMappingId(), r.getConcertMapping().getLocation().getSeatCapacity()))
+                .map(
+                        r -> new ConcertMappingSeatInfoVO(
+                                r.getConcertMapping().getConcertMappingId(),
+                                r.getConcertMapping().getLocation().getSeatCapacity()
+                        )
+                )
                 .distinct()
                 .toList();
     }

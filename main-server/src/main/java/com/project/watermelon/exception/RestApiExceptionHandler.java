@@ -57,4 +57,10 @@ public class RestApiExceptionHandler {
     public ResponseEntity<Object> handleInvalidIdExceptions(CustomException ex) {
         return getObjectResponseEntity(ex);
     }
+
+    @ExceptionHandler(value = { RedisLockException.class })
+    public ResponseEntity<Object> handleRedisLockExceptions(CustomException ex) {
+        return getObjectResponseEntity(ex);
+    }
+
 }

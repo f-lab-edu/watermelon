@@ -16,11 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class PaymentController {
     private final PaymentService paymentService;
 
-    @PostMapping("/lock")
-    public void lockReservation(@RequestBody PostPaymentRequestDto requestDto) {
-        paymentService.lockReservation(requestDto.getReservationId());
-    }
-
     @PostMapping("/process")
     public PaymentResponseDto processPayment(@RequestBody PostPaymentRequestDto requestDto) {
         String email = SecurityUtil.getCurrentMemberUsername();
