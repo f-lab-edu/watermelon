@@ -2,15 +2,13 @@ package com.project.watermelon.aspect;
 
 import com.project.watermelon.annotation.RedisLock;
 import com.project.watermelon.exception.RedisLockException;
+import com.project.watermelon.model.LockKey;
 import com.project.watermelon.service.RedisLockService;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
@@ -22,7 +20,6 @@ public class RedisLockAspect {
 
     private final RedisLockService redisLockService;
     private static final int REDIS_TTL_SECONDS = 300;
-    private static final String LOCK_PREFIX = "reservationLock:";
 
     @Around("@annotation(com.project.watermelon.annotation.RedisLock)")
     public Object aroundProcessPayment(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -30,9 +27,12 @@ public class RedisLockAspect {
         Method method = signature.getMethod();
         RedisLock redisLock = method.getAnnotation(RedisLock.class);
 
-        // Annotation 에서 key 필드 가져오기
-        String keyExpression = redisLock.key();
-        String lockKey = getLockKey(joinPoint, keyExpression);
+        // Annotation에서 keyType 필드와 lockPrefix 필드를 가져오기
+        Class<?> keyType = redisLock.keyType();
+        String lockPrefix = redisLock.lockPrefix();
+        Object lockKeyObject = getLockKeyObject(joinPoint, keyType);
+
+        String lockKey = lockPrefix + getLockKeyFromObject(lockKeyObject);
 
         try {
             boolean locked = redisLockService.lock(lockKey, REDIS_TTL_SECONDS);
@@ -47,20 +47,20 @@ public class RedisLockAspect {
         }
     }
 
-    private String getLockKey(ProceedingJoinPoint joinPoint, String keyExpression) {
-        ExpressionParser parser = new SpelExpressionParser();
-        StandardEvaluationContext context = new StandardEvaluationContext();
-
-        // 메서드 인자들을 컨텍스트에 추가
+    private Object getLockKeyObject(ProceedingJoinPoint joinPoint, Class<?> keyType) {
         Object[] args = joinPoint.getArgs();
-        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-        String[] parameterNames = methodSignature.getParameterNames();
-
-        for (int i = 0; i < args.length; i++) {
-            context.setVariable(parameterNames[i], args[i]);
+        for (Object arg : args) {
+            if (keyType.isInstance(arg)) {
+                return arg;
+            }
         }
+        throw new IllegalArgumentException("No parameter of type " + keyType.getName() + " found in method arguments.");
+    }
 
-        // keyExpression 평가
-        return LOCK_PREFIX + parser.parseExpression(keyExpression).getValue(context, String.class);
+    private String getLockKeyFromObject(Object lockKeyObject) {
+        if (lockKeyObject instanceof LockKey) {
+            return ((LockKey) lockKeyObject).getLockKey().toString();
+        }
+        throw new IllegalArgumentException("Unsupported key type: " + lockKeyObject.getClass().getName());
     }
 }

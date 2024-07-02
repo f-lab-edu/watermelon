@@ -2,6 +2,7 @@ package com.project.watermelon.controller;
 
 import com.project.watermelon.dto.payment.PaymentResponseDto;
 import com.project.watermelon.dto.payment.PostPaymentRequestDto;
+import com.project.watermelon.model.LockKey;
 import com.project.watermelon.security.SecurityUtil;
 import com.project.watermelon.service.PaymentService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class PaymentController {
     @PostMapping("/process")
     public PaymentResponseDto processPayment(@RequestBody PostPaymentRequestDto requestDto) {
         String email = SecurityUtil.getCurrentMemberUsername();
-        return paymentService.processPayment(email, requestDto.getReservationId(), requestDto.getSeatId());
+        LockKey reservationLockKey = new LockKey(requestDto.getReservationId());
+        return paymentService.processPayment(email, reservationLockKey, requestDto.getSeatId());
     }
 }
