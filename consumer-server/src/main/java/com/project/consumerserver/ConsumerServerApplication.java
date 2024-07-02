@@ -9,7 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @EnableJpaAuditing
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.project.watermelon"})
+@ComponentScan(basePackages = {"com.project.watermelon", "com.project.consumerserver"})
 public class ConsumerServerApplication {
 
 	public static void main(String[] args) {
