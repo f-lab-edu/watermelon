@@ -5,6 +5,10 @@ plugins {
 group = 'com.project.watermelon'
 version = '0.0.1-SNAPSHOT'
 
+java {
+    sourceCompatibility = '17'
+}
+
 repositories {
     mavenCentral()
 }
@@ -20,6 +24,9 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.4'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.4'
     implementation 'com.fasterxml.jackson.core:jackson-core:2.15.4'
+
+    // redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis:3.2.5'
 }
 
 java {

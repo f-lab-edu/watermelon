@@ -31,16 +31,4 @@ public class ReservationRedisRepository {
         stringRedisTemplate.expire(hashKey, 10, TimeUnit.MINUTES);
     }
 
-    // 예매 데이터 락 설정 (배치잡에서 EXPIRED 시키는 작업 방지)
-    public void lockReservation(Long reservationId, long ttlInSeconds) {
-        ValueOperations<String, String> ops = stringRedisTemplate.opsForValue();
-        String key = "reservationLock:" + reservationId;
-        ops.set(key, "locked", ttlInSeconds, TimeUnit.SECONDS);
-    }
-
-    // 락을 걸어둔 예매 데이터 아이디 Set 에 추가 (배치잡에서 조회용)
-    public void addLockedReservationId(String key, Long reservationId) {
-        stringRedisTemplate.opsForSet().add(key, reservationId.toString());
-    }
-
 }

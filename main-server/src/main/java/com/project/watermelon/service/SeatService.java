@@ -1,10 +1,13 @@
 package com.project.watermelon.service;
 
+import com.project.watermelon.annotation.RedisLock;
 import com.project.watermelon.dto.seat.SeatListResponseDto;
 import com.project.watermelon.enumeration.ReservationStatus;
 import com.project.watermelon.exception.InvalidIdException;
 import com.project.watermelon.model.ConcertMapping;
+import com.project.watermelon.model.LockKey;
 import com.project.watermelon.model.Reservation;
+import com.project.watermelon.model.Seat;
 import com.project.watermelon.repository.ConcertMappingRepository;
 import com.project.watermelon.repository.ReservationRepository;
 import com.project.watermelon.repository.SeatRepository;
@@ -61,5 +64,12 @@ public class SeatService {
         // SeatListResponseDto 생성 및 반환
         SeatListResponseVo seatListResponse = new SeatListResponseVo(seatVoList);
         return new SeatListResponseDto(seatListResponse);
+    }
+
+    @RedisLock(keyType = LockKey.class, lockPrefix = "seatLock:") // 동시에 같은 좌석을 결제하는 경우 방지 -> 클라이언트 처리 위임
+    public Seat lockAndRetrieveSeat(LockKey seatLockKey, Long seatId) {
+        return seatRepository.findBySeatId(seatId).orElseThrow(
+                () -> new InvalidIdException("Invalid seatId: " + seatId)
+        );
     }
 }
