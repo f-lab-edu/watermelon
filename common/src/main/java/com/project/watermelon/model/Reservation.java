@@ -15,9 +15,11 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "RESERVATION", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"concertMappingId", "memberId"})
-})
+@Table(
+    name = "RESERVATION",
+    uniqueConstraints = {@UniqueConstraint(columnNames = {"concertMappingId", "memberId"})},
+    indexes = {@Index(name = "idx_status", columnList = "status")}
+)
 public class Reservation extends Timestamped {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id

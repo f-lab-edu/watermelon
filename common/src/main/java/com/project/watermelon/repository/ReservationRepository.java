@@ -35,5 +35,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByStatusAndAvailableAtBeforeAndConcertMappingConcertMappingIdIn(
             ReservationStatus status, LocalDateTime expiryTime, List<Long> concertMappingIds, Pageable pageable);
 
+    int countByConcertMapping_ConcertMappingIdAndStatusNotAndReservationRankLessThan(
+            @Param("concertMappingId") Long concertMappingId,
+            @Param("status") ReservationStatus status,
+            @Param("reservationRank") Long reservationRank
+    );
+
 }
 

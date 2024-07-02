@@ -53,7 +53,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/seats/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/webapp/resources/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/concerts/**").permitAll()
-                        .requestMatchers("/reservations/*").hasAnyAuthority(MemberRole.MEMBER.getAuthority())
+                        .requestMatchers("/reservations/**").hasAnyAuthority(MemberRole.MEMBER.getAuthority())
                         .requestMatchers("/payments/*").hasAnyAuthority(MemberRole.MEMBER.getAuthority())
                         .anyRequest().hasAuthority(MemberRole.QUALIFIED_MEMBER.getAuthority()))
 

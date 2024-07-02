@@ -2,10 +2,14 @@ package com.project.watermelon.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.watermelon.dto.CommonBackendResponseDto;
+import com.project.watermelon.dto.reservation.ReservationRankResponseDto;
+import com.project.watermelon.enumeration.ReservationStatus;
+import com.project.watermelon.exception.InvalidIdException;
 import com.project.watermelon.exception.MemberAlreadyRequestReservationException;
 import com.project.watermelon.model.Reservation;
 import com.project.watermelon.repository.ReservationRedisRepository;
 import com.project.watermelon.repository.ReservationRepository;
+import com.project.watermelon.vo.ReservationRankVo;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -117,5 +121,23 @@ public class ReservationService {
             }
         }
         return isMemberExists;
+    }
+
+    public ReservationRankResponseDto retrieveReservationRank(Long concertMappingId, Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(
+                () -> new InvalidIdException("Invalid reservationId.")
+        );
+        Long reservationRank = reservation.getReservationRank();
+        int nonWaitingCount = reservationRepository.countByConcertMapping_ConcertMappingIdAndStatusNotAndReservationRankLessThan(
+                concertMappingId,
+                ReservationStatus.WAIT,
+                reservationRank
+        );
+        int currentRank = Math.toIntExact(reservationRank - nonWaitingCount);
+
+        ReservationRankVo reservationRankVo = new ReservationRankVo(currentRank);
+        return new ReservationRankResponseDto(
+                reservationRankVo
+        );
     }
 }
