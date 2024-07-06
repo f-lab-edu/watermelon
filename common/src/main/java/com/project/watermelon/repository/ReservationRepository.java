@@ -14,7 +14,7 @@ import java.util.Optional;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    Optional<Reservation> findByMember_Email(String email);
+    Optional<Reservation> findByMember_EmailAndConcertMapping_ConcertMappingId(String email, Long concertMappingId);
 
     Optional<Reservation> findByMember_EmailAndReservationId(String email, Long reservationId);
 

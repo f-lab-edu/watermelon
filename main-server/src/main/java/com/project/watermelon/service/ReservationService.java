@@ -110,7 +110,7 @@ public class ReservationService {
         boolean isMemberExists = hashOps.hasKey(key, memberEmail);
 
         if (!isMemberExists) {
-            Optional<Reservation> reservation = reservationRepository.findByMember_Email(memberEmail);
+            Optional<Reservation> reservation = reservationRepository.findByMember_EmailAndConcertMapping_ConcertMappingId(memberEmail, Long.parseLong(stringConcertMappingId));
             if (reservation.isPresent()) {
                 reservationRedisRepository.storeUserIdWithDefaultState(memberEmail, stringConcertMappingId);
                 isMemberExists = true;
