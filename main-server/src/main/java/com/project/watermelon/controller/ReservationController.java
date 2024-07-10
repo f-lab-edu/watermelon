@@ -2,6 +2,7 @@ package com.project.watermelon.controller;
 
 import com.project.watermelon.dto.CommonBackendResponseDto;
 import com.project.watermelon.dto.reservation.PostReservationMessageRequestDto;
+import com.project.watermelon.dto.reservation.ReservationIdResponseDto;
 import com.project.watermelon.dto.reservation.ReservationMessageResponseDto;
 import com.project.watermelon.dto.reservation.ReservationRankResponseDto;
 import com.project.watermelon.security.SecurityUtil;
@@ -19,6 +20,12 @@ public class ReservationController {
     public CommonBackendResponseDto<String> produceReservationMessage(@RequestBody PostReservationMessageRequestDto requestDto) {
         String email = SecurityUtil.getCurrentMemberUsername();
         return reservationService.produceReservationMessage(email, requestDto.getConcertMappingId());
+    }
+
+    @GetMapping("/id/{concertMappingId}")
+    public ReservationIdResponseDto getReservationId(@PathVariable("concertMappingId") Long concertMappingId) {
+        String email = SecurityUtil.getCurrentMemberUsername();
+        return reservationService.retrieveReservationId(concertMappingId, email);
     }
 
     @GetMapping("/rank/{concertMappingId}/{reservationId}")

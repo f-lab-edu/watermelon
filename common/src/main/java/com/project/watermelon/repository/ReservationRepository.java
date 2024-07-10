@@ -16,6 +16,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     Optional<Reservation> findByMember_Email(String email);
 
+    @EntityGraph(attributePaths = {"concertMapping", "member"})
+    Optional<Reservation> findByConcertMapping_ConcertMappingIdAndMember_Email(@Param("concertMappingId") Long concertMappingId, @Param("email") String email);
+
     Optional<Reservation> findByMember_EmailAndReservationId(String email, Long reservationId);
 
     // @EntityGraph 를 통해 fetch join -> N+1 문제 방지

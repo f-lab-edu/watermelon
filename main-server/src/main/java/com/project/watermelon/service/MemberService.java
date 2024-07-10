@@ -4,6 +4,7 @@ import com.project.watermelon.dto.member.MemberLoginRequestDto;
 import com.project.watermelon.dto.member.MemberSignUpRequestDto;
 import com.project.watermelon.dto.member.MemberSignUpResponseDto;
 import com.project.watermelon.dto.token.TokenDto;
+import com.project.watermelon.exception.InvalidIdException;
 import com.project.watermelon.model.Member;
 import com.project.watermelon.model.RefreshToken;
 import com.project.watermelon.repository.MemberRepository;
@@ -16,6 +17,8 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -80,5 +83,12 @@ public class MemberService {
             String message = "check email or password.";
             return new TokenDto(status, message);
         }
+    }
+
+    public String retrieveMemberName(String email) {
+        Member member = memberRepository.findByEmail(email).orElseThrow(
+                () -> new InvalidIdException("Invalid member email.")
+        );
+        return member.getMemberName();
     }
 }

@@ -2,6 +2,7 @@ package com.project.watermelon.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.watermelon.dto.CommonBackendResponseDto;
+import com.project.watermelon.dto.reservation.ReservationIdResponseDto;
 import com.project.watermelon.dto.reservation.ReservationRankResponseDto;
 import com.project.watermelon.enumeration.ReservationStatus;
 import com.project.watermelon.exception.InvalidIdException;
@@ -9,6 +10,7 @@ import com.project.watermelon.exception.MemberAlreadyRequestReservationException
 import com.project.watermelon.model.Reservation;
 import com.project.watermelon.repository.ReservationRedisRepository;
 import com.project.watermelon.repository.ReservationRepository;
+import com.project.watermelon.vo.ReservationIdVo;
 import com.project.watermelon.vo.ReservationRankVo;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -121,6 +123,18 @@ public class ReservationService {
             }
         }
         return isMemberExists;
+    }
+
+    public ReservationIdResponseDto retrieveReservationId(Long concertMappingId, String email) {
+        Reservation reservation = reservationRepository.findByConcertMapping_ConcertMappingIdAndMember_Email(concertMappingId, email).orElseThrow(
+                () -> new InvalidIdException("Invalid concertMappingId.")
+        );
+        Long reservationId = reservation.getReservationId();
+
+        ReservationIdVo reservationIdVo = new ReservationIdVo(reservationId);
+        return new ReservationIdResponseDto(
+                reservationIdVo
+        );
     }
 
     public ReservationRankResponseDto retrieveReservationRank(Long concertMappingId, Long reservationId) {

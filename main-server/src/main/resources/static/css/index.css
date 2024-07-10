@@ -38,13 +38,17 @@ section {
     background-color: white;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     border-radius: 5px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
 }
 
 #concertDetails {
     display: none;
 }
 
-#backButton {
+#backButton, #reserveButton, #backToConcertDetails {
     padding: 10px 20px;
     font-size: 16px;
     background-color: #007BFF;
@@ -52,51 +56,11 @@ section {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    margin-top: 20px;
 }
 
-#backButton:hover {
+#backButton:hover, #reserveButton:hover, #backToConcertDetails:hover {
     background-color: #0056b3;
-}
-
-/* Form layout and style */
-form {
-    max-width: 400px;
-    margin: 2rem auto;
-    padding: 2rem;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-}
-
-/* Form input fields styling */
-input[type="email"], input[type="password"], input[type="text"] {
-    width: 100%;
-    padding: 10px;
-    margin-top: 8px;
-    margin-bottom: 16px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-/* Form submit button styling */
-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-/* Centering the form headers */
-h2 {
-    text-align: center;
 }
 
 .card {
@@ -117,16 +81,46 @@ h2 {
     color: #000;
 }
 
-button {
-    background-color: #0056b3;
-    color: white;
+/* 추가된 CSS */
+.concert-box {
+    background-color: white;
+    padding: 20px;
+    margin: 10px 0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.concert-box:hover {
+    transform: scale(1.02);
+}
+
+/* 로그인 및 회원가입 폼 스타일 */
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+input[type="email"], input[type="password"], input[type="text"] {
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+button[type="submit"] {
     padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007BFF;
+    color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
-button:hover {
-    background-color: #00408b;
+button[type="submit"]:hover {
+    background-color: #0056b3;
 }
