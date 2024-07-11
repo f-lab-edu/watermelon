@@ -13,26 +13,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     document.getElementById('backButton').addEventListener('click', backToList);
     document.getElementById('reserveButton').addEventListener('click', reserveTicket);
-    document.getElementById('backToConcertDetails').addEventListener('click', () => {
-        stopPolling();
-        backToConcertDetails();
-    });
 });
-
-let pollingInterval = null;
-
-function startPolling(concertMappingId, reservationId, accessToken) {
-    pollingInterval = setInterval(() => {
-        getReservationRank(concertMappingId, reservationId, accessToken);
-    }, 10000);
-}
-
-function stopPolling() {
-    if (pollingInterval) {
-        clearInterval(pollingInterval);
-        pollingInterval = null;
-    }
-}
 
 function fetchConcertList() {
     console.log('Fetching concert list'); // 디버깅용
@@ -96,7 +77,7 @@ function fetchConcertDetails(concertId) {
 }
 
 function reserveTicket() {
-    const concertMappingId = document.getElementById('concertId').textContent;
+    const concertMappingId = Number(document.getElementById('concertId').textContent); // 숫자로 변환
     const accessToken = localStorage.getItem('accessToken');
     console.log('Reserving ticket for concertMappingId:', concertMappingId); // 디버깅용
 
@@ -115,7 +96,7 @@ function reserveTicket() {
             }
             if (response.status === 400) {
                 // 이미 예매 요청을 보낸 경우 대기열 화면으로 이동
-                return { status: 'ok' };
+                return getReservationId(concertMappingId, accessToken);
             }
             return response.json();
         })
@@ -138,28 +119,11 @@ function getReservationId(concertMappingId, accessToken) {
         .then(response => response.json())
         .then(data => {
             const reservationId = data.data.reservationId;
-            getReservationRank(concertMappingId, reservationId, accessToken);
-            startPolling(concertMappingId, reservationId, accessToken); // 폴링 시작
+            localStorage.setItem('concertMappingId', concertMappingId);
+            localStorage.setItem('reservationId', reservationId);
+            window.location.href = '/queue.html';
         })
         .catch(error => console.error('Error getting reservation ID:', error));
-}
-
-function getReservationRank(concertMappingId, reservationId, accessToken) {
-    fetch(`http://localhost:8080/reservations/rank/${concertMappingId}/${reservationId}`, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-        }
-    })
-        .then(response => response.json())
-        .then(data => {
-            const rank = data.data.reservationRank;
-            document.getElementById('queueMessage').textContent = `Your rank is ${rank}`;
-            document.getElementById('concertDetails').style.display = 'none';
-            document.getElementById('queueScreen').style.display = 'block';
-        })
-        .catch(error => console.error('Error getting reservation rank:', error));
 }
 
 function fetchMemberName(token) {
@@ -219,13 +183,6 @@ function displayLoginButtons() {
 }
 
 function backToList() {
-    stopPolling();
     document.getElementById('concertDetails').style.display = 'none';
     document.getElementById('concertList').style.display = 'block';
-}
-
-function backToConcertDetails() {
-    stopPolling();
-    document.getElementById('queueScreen').style.display = 'none';
-    document.getElementById('concertDetails').style.display = 'block';
 }

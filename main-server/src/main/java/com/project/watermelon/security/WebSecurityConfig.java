@@ -47,7 +47,7 @@ public class WebSecurityConfig {
 
 //                        .requestMatchers("/**").permitAll()) // for local debug
 
-                        .requestMatchers("/index.html","/signup.html", "/login.html", "/favicon.ico").permitAll() // 회원가입, 로그인 페이지 허용
+                        .requestMatchers("/index.html","/signup.html", "/login.html", "/queue.html", "/payment.html").permitAll() // 회원가입, 로그인 페이지 허용
                         .requestMatchers("/css/**", "/js/**").permitAll() // CSS, JavaScript 파일 허용
                         .requestMatchers("/members/signup").permitAll()
                         .requestMatchers("/members/login").permitAll()

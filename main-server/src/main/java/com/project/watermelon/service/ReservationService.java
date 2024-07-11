@@ -116,7 +116,7 @@ public class ReservationService {
         boolean isMemberExists = hashOps.hasKey(key, memberEmail);
 
         if (!isMemberExists) {
-            Optional<Reservation> reservation = reservationRepository.findByMember_Email(memberEmail);
+            Optional<Reservation> reservation = reservationRepository.findByConcertMapping_ConcertMappingIdAndMember_Email(Long.parseLong(stringConcertMappingId), memberEmail);
             if (reservation.isPresent()) {
                 reservationRedisRepository.storeUserIdWithDefaultState(memberEmail, stringConcertMappingId);
                 isMemberExists = true;
@@ -148,8 +148,9 @@ public class ReservationService {
                 reservationRank
         );
         int currentRank = Math.toIntExact(reservationRank - nonWaitingCount);
+        ReservationStatus reservationStatus = reservation.getStatus();
 
-        ReservationRankVo reservationRankVo = new ReservationRankVo(currentRank);
+        ReservationRankVo reservationRankVo = new ReservationRankVo(currentRank, reservationStatus);
         return new ReservationRankResponseDto(
                 reservationRankVo
         );
