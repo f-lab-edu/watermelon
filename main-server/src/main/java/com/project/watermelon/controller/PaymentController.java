@@ -15,11 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/payments")
 public class PaymentController {
+
     private final PaymentService paymentService;
+    private final SecurityUtil securityUtil;
 
     @PostMapping("/process")
     public PaymentResponseDto processPayment(@RequestBody PostPaymentRequestDto requestDto) {
-        String email = SecurityUtil.getCurrentMemberUsername();
+        String email = securityUtil.getCurrentMemberUsername();
         LockKey reservationLockKey = new LockKey(requestDto.getReservationId());
         return paymentService.processPayment(email, reservationLockKey, requestDto.getSeatId());
     }

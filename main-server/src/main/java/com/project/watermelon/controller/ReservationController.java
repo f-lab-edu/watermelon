@@ -19,7 +19,8 @@ public class ReservationController {
 
     @PostMapping("/message")
     public CommonBackendResponseDto<String> produceReservationMessage(@RequestBody PostReservationMessageRequestDto requestDto) {
-        String email = SecurityUtil.getCurrentMemberUsername();
-        return reservationService.produceReservationMessage(email, requestDto.getConcertMappingId());
+        String email = requestDto.getEmail();
+//        return reservationService.produceReservationMessage(email, requestDto.getConcertMappingId());
+        return reservationService.produceReservationMessage(requestDto.getConcertMappingId());
     }
 }
