@@ -52,6 +52,8 @@ function displaySeats(seatList) {
     });
 }
 
+let selectedSeat = null;
+
 function selectSeat(seat) {
     const previouslySelectedSeat = document.querySelector('.seat.selected');
     if (previouslySelectedSeat) {
@@ -60,6 +62,8 @@ function selectSeat(seat) {
 
     const seatElement = document.querySelector(`.seat[data-seat-id='${seat.seatId}']`);
     seatElement.classList.add('selected');
+
+    selectedSeat = seat;
 
     const selectedSeatInfo = document.getElementById('selectedSeatInfo');
     selectedSeatInfo.innerHTML = `
@@ -70,13 +74,31 @@ function selectSeat(seat) {
 }
 
 function processPayment() {
-    const selectedSeat = document.querySelector('.seat.selected');
     if (!selectedSeat) {
         alert('좌석을 선택해 주세요.');
         return;
     }
 
-    const seatId = selectedSeat.dataset.seatId;
-    alert(`좌석 ${seatId}번 결제를 진행합니다.`);
-    // 결제 로직을 추가할 수 있습니다.
+    const reservationId = localStorage.getItem('reservationId');
+    const accessToken = localStorage.getItem('accessToken');
+    const seatId = selectedSeat.seatId;
+
+    fetch('http://localhost:8080/payments/process', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ reservationId: Number(reservationId), seatId: seatId })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                alert(`결제 성공! 좌석 번호: ${data.data.seatId}`);
+                window.location.href = '/index.html';
+            } else {
+                alert('결제에 실패했습니다.');
+            }
+        })
+        .catch(error => console.error('Error processing payment:', error));
 }

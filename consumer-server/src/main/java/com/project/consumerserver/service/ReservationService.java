@@ -70,6 +70,10 @@ public class ReservationService {
             long updateCount = (targetSeatCapacity - availableOrReservedCount);
             int updateCountInt = Math.toIntExact(updateCount);
 
+            if (updateCountInt <= 0) {
+                return;
+            }
+
             // update 가능 카운트 만큼 WAIT -> AVAILABLE status 로 업데이트
             Pageable availablePageable = PageRequest.of(0, updateCountInt);
             List<Reservation> reservationsToAvailable = reservationRepository.findByConcertMappingConcertMappingIdAndStatusOrderByReservationRank(
