@@ -2,10 +2,17 @@ package com.project.watermelon.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.watermelon.dto.CommonBackendResponseDto;
+import com.project.watermelon.dto.reservation.ReservationIdResponseDto;
+import com.project.watermelon.dto.reservation.ReservationRankResponseDto;
+import com.project.watermelon.enumeration.ReservationStatus;
+import com.project.watermelon.exception.InvalidIdException;
 import com.project.watermelon.exception.MemberAlreadyRequestReservationException;
 import com.project.watermelon.model.Reservation;
 import com.project.watermelon.repository.ReservationRedisRepository;
 import com.project.watermelon.repository.ReservationRepository;
+import com.project.watermelon.vo.ReservationIdVo;
+import com.project.watermelon.vo.ReservationRankVo;
+import jakarta.annotation.PostConstruct;
 import com.project.watermelon.security.SecurityUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -101,6 +108,36 @@ public class ReservationService {
         }
         return isMemberExists;
     }
+
+    public ReservationIdResponseDto retrieveReservationId(Long concertMappingId, String email) {
+        Reservation reservation = reservationRepository.findByConcertMapping_ConcertMappingIdAndMember_Email(concertMappingId, email).orElseThrow(
+                () -> new InvalidIdException("Invalid concertMappingId.")
+        );
+        Long reservationId = reservation.getReservationId();
+
+        ReservationIdVo reservationIdVo = new ReservationIdVo(reservationId);
+        return new ReservationIdResponseDto(
+                reservationIdVo
+        );
+    }
+
+    public ReservationRankResponseDto retrieveReservationRank(Long concertMappingId, Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(
+                () -> new InvalidIdException("Invalid reservationId.")
+        );
+        Long reservationRank = reservation.getReservationRank();
+        int nonWaitingCount = reservationRepository.countByConcertMapping_ConcertMappingIdAndStatusNotAndReservationRankLessThan(
+                concertMappingId,
+                ReservationStatus.WAIT,
+                reservationRank
+        );
+        int currentRank = Math.toIntExact(reservationRank - nonWaitingCount);
+        ReservationStatus reservationStatus = reservation.getStatus();
+
+        ReservationRankVo reservationRankVo = new ReservationRankVo(currentRank, reservationStatus);
+        return new ReservationRankResponseDto(
+                reservationRankVo
+        );
 
     private <T> ListenableFuture<T> toListenableFuture(CompletableFuture<T> completableFuture) {
         SettableListenableFuture<T> listenableFuture = new SettableListenableFuture<>();

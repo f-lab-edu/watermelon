@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Concert Information</title>
+    <title>Watermelon</title>
     <link rel="stylesheet" href="/css/index.css">
 </head>
 <body>
 <header>
-    <h1>Concert Information</h1>
+    <h1>🍉 Watermelon 🍉</h1>
     <nav>
-        <ul>
-            <li><a href="/signup.html">Sign Up</a></li>
-            <li><a href="/login.html">Login</a></li>
+        <ul id="navList">
+            <li id="signup"><a href="signup.html">Sign Up</a></li>
+            <li id="login"><a href="login.html">Login</a></li>
+            <li id="memberName" style="display: none;"></li>
         </ul>
     </nav>
 </header>
@@ -23,15 +24,17 @@
 </section>
 
 <section id="concertDetails" style="display:none;">
-    <h2>Concert Details</h2>
+    <h2>콘서트 상세 화면</h2>
     <div class="card">
-        <p><strong>Concert ID:</strong> <span id="concertId"></span></p>
-        <p><strong>Location:</strong> <span id="location"></span></p>
-        <p><strong>Date:</strong> <span id="date"></span></p>
-        <p><strong>Start Time:</strong> <span id="startTime"></span></p>
-        <p><strong>End Time:</strong> <span id="endTime"></span></p>
+        <p><strong>콘서트 :</strong> <span id="title"></span></p>
+        <p><strong>콘서트 ID:</strong> <span id="concertId"></span></p>
+        <p><strong>장소:</strong> <span id="location"></span></p>
+        <p><strong>날짜:</strong> <span id="date"></span></p>
+        <p><strong>시작 시간:</strong> <span id="startTime"></span></p>
+        <p><strong>종료 시간:</strong> <span id="endTime"></span></p>
     </div>
-    <button id="backButton">Back to List</button>
+    <button id="backButton">공연 목록으로 돌아가기</button>
+    <button id="reserveButton">예매하기</button>
 </section>
 
 <script src="/js/script.js"></script>

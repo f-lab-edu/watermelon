@@ -22,6 +22,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByMemberEmailAndConcertMappingConcertMappingId(String email, Long concertMappingId);
 
 
+    @EntityGraph(attributePaths = {"concertMapping", "member"})
+    Optional<Reservation> findByConcertMapping_ConcertMappingIdAndMember_Email(@Param("concertMappingId") Long concertMappingId, @Param("email") String email);
+
     Optional<Reservation> findByMember_EmailAndReservationId(String email, Long reservationId);
 
     // @EntityGraph 를 통해 fetch join -> N+1 문제 방지
@@ -40,6 +43,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByStatusAndAvailableAtBeforeAndConcertMappingConcertMappingIdIn(
             ReservationStatus status, LocalDateTime expiryTime, List<Long> concertMappingIds, Pageable pageable);
+
+    int countByConcertMapping_ConcertMappingIdAndStatusNotAndReservationRankLessThan(
+            @Param("concertMappingId") Long concertMappingId,
+            @Param("status") ReservationStatus status,
+            @Param("reservationRank") Long reservationRank
+    );
 
 }
 

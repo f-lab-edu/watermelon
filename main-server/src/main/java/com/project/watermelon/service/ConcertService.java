@@ -52,6 +52,7 @@ public class ConcertService {
                         .concertMappingId(concertMapping.getConcertMappingId())
                         .concertId(concert.getConcertId())
                         .locationId(location.getLocationId())
+                        .locationName(location.getLocationName())
                         .title(concert.getTitle())
                         .genre(concert.getGenre())
                         .concertDate(concertMapping.getConcertDate())

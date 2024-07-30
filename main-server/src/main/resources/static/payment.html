@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment</title>
+  <link rel="stylesheet" href="/css/index.css">
+  <style>
+    .seat {
+      display: inline-block;
+      width: 50px;
+      height: 50px;
+      margin: 5px;
+      background-color: #4CAF50;
+      color: white;
+      text-align: center;
+      line-height: 50px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .seat.selected {
+      background-color: #f44336;
+    }
+
+    .seat.unavailable {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .seat-info {
+      margin-top: 20px;
+    }
+
+    #paymentButton {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: none;
+    }
+
+    #paymentButton:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+<section>
+  <h2>좌석 선택</h2>
+  <div id="seatsContainer">
+    <!-- 좌석 리스트가 여기에 동적으로 추가됩니다. -->
+  </div>
+  <div class="seat-info" id="selectedSeatInfo">
+    <!-- 선택된 좌석 정보가 여기에 표시됩니다. -->
+  </div>
+  <button id="paymentButton">결제하기</button>
+</section>
+
+<script src="/js/payment.js"></script>
+</body>
+</html>
