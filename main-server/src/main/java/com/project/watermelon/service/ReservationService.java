@@ -13,78 +13,65 @@ import com.project.watermelon.repository.ReservationRepository;
 import com.project.watermelon.vo.ReservationIdVo;
 import com.project.watermelon.vo.ReservationRankVo;
 import jakarta.annotation.PostConstruct;
+import com.project.watermelon.security.SecurityUtil;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.apache.kafka.clients.producer.KafkaProducer;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.SettableListenableFuture;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReservationService {
+
     private final ReservationRedisRepository reservationRedisRepository;
     private final ReservationRepository reservationRepository;
-    private final KafkaProducer<String, String> kafkaProducer;
+    private final KafkaTemplate<String, String> kafkaTemplate;
     private final StringRedisTemplate stringRedisTemplate;
+    private final SecurityUtil securityUtil;
 
     @Value("${kafka.reservationMessageTopic}")
     private String reservationMessageTopic;
 
-    @PostConstruct
-    public void init() {
-        kafkaProducer.initTransactions();  // 서비스 초기화 시에 한 번만 호출
-    }
-
     @Transactional
-    public CommonBackendResponseDto<String> produceReservationMessage(String memberEmail, Long concertMappingId) {
+    public CommonBackendResponseDto<String> produceReservationMessage(Long concertMappingId) {
+        String memberEmail = securityUtil.getCurrentMemberUsername();
         String stringConcertMappingId = Long.toString(concertMappingId);
 
         if (isMemberExists(stringConcertMappingId, memberEmail)) {
             String message = "Member " + memberEmail + " is already registered for concert: " + stringConcertMappingId;
-            System.out.println(message);
-            throw new MemberAlreadyRequestReservationException(message);
+            log.warn(message);
+            CommonBackendResponseDto<String> errorResponse = new CommonBackendResponseDto<>();
+            errorResponse.markAsFailed(message);
+            return errorResponse;
         }
+
         try {
-            // 트랜잭션 시작
-            kafkaProducer.beginTransaction();
-            // Jackson ObjectMapper 인스턴스 생성
             ProducerRecord<String, String> record = transformMessageStringToJson(memberEmail, stringConcertMappingId);
-            // Future 객체를 통해 send() 결과 확인
-            Future<RecordMetadata> sendFuture = kafkaProducer.send(record);
+            CompletableFuture<SendResult<String, String>> completableFuture = kafkaTemplate.send(record);
+            ListenableFuture<SendResult<String, String>> listenableFuture = toListenableFuture(completableFuture);
 
-            // 메시지 전송 완료 까지 대기 (Timeout 1sec)
-            RecordMetadata metadata = sendFuture.get(1, TimeUnit.SECONDS);
-
-            // 트랜잭션 커밋
-            kafkaProducer.commitTransaction();
-
-            reservationRedisRepository.storeUserIdWithDefaultState(memberEmail, stringConcertMappingId);
-            System.out.println("Message sent to topic " + metadata.topic() + " with offset " + metadata.offset());
-        } catch (TimeoutException e) {
-            kafkaProducer.abortTransaction();
-            System.out.println("Timeout while waiting for message send to complete");
-            throw new RuntimeException("TimeoutException occurred during message production", e);
-        } catch (ExecutionException e) {
-            kafkaProducer.abortTransaction();
-            System.out.println("Execution exception while sending message");
-            throw new RuntimeException("ExecutionException occurred during message production", e);
-        } catch (InterruptedException e) {
-            kafkaProducer.abortTransaction();
-            System.out.println("Interrupted while waiting for message send to complete");
-            Thread.currentThread().interrupt();  // Restore interrupted status
-            throw new RuntimeException("InterruptedException occurred during message production", e);
+            listenableFuture.addCallback(result -> {
+                reservationRedisRepository.storeUserIdWithDefaultState(memberEmail, stringConcertMappingId);
+                log.info("Message sent to topic {} with offset {}", result.getRecordMetadata().topic(), result.getRecordMetadata().offset());
+            }, ex -> {
+                log.error("Failed to send message", ex);
+            });
+        } catch (Exception e) {
+            log.error("Exception while sending message", e);
+            throw new RuntimeException("Exception occurred during message production", e);
         }
 
         return new CommonBackendResponseDto<>();
@@ -93,17 +80,15 @@ public class ReservationService {
     private ProducerRecord<String, String> transformMessageStringToJson(String memberEmail, String stringConcertMappingId) {
         ObjectMapper objectMapper = new ObjectMapper();
 
-        // 데이터를 담을 Map 생성
         Map<String, String> messageMap = new HashMap<>();
         messageMap.put("concertMappingId", stringConcertMappingId);
         messageMap.put("memberEmail", memberEmail);
 
         try {
-            // Map을 JSON 문자열로 변환
             String messageValue = objectMapper.writeValueAsString(messageMap);
             return new ProducerRecord<>(reservationMessageTopic, stringConcertMappingId, messageValue);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to serialize message to JSON", e);
             throw new RuntimeException("Failed to serialize message to JSON", e);
         }
     }
@@ -112,12 +97,11 @@ public class ReservationService {
         HashOperations<String, String, String> hashOps = stringRedisTemplate.opsForHash();
         String key = "concertMappingId:" + stringConcertMappingId + ":memberStatus";
 
-        // 중복 체크
         boolean isMemberExists = hashOps.hasKey(key, memberEmail);
 
         if (!isMemberExists) {
-            Optional<Reservation> reservation = reservationRepository.findByMember_EmailAndConcertMapping_ConcertMappingId(memberEmail, Long.parseLong(stringConcertMappingId));
-            if (reservation.isPresent()) {
+            boolean isReservationExist = reservationRepository.existsByMemberEmailAndConcertMappingConcertMappingId(memberEmail, Long.parseLong(stringConcertMappingId));
+            if (isReservationExist) {
                 reservationRedisRepository.storeUserIdWithDefaultState(memberEmail, stringConcertMappingId);
                 isMemberExists = true;
             }
@@ -154,5 +138,16 @@ public class ReservationService {
         return new ReservationRankResponseDto(
                 reservationRankVo
         );
+
+    private <T> ListenableFuture<T> toListenableFuture(CompletableFuture<T> completableFuture) {
+        SettableListenableFuture<T> listenableFuture = new SettableListenableFuture<>();
+        completableFuture.whenComplete((result, ex) -> {
+            if (ex == null) {
+                listenableFuture.set(result);
+            } else {
+                listenableFuture.setException(ex);
+            }
+        });
+        return listenableFuture;
     }
 }

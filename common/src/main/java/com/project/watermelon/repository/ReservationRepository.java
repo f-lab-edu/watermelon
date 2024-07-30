@@ -6,6 +6,7 @@ import com.project.watermelon.model.Reservation;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
@@ -14,7 +15,12 @@ import java.util.Optional;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    Optional<Reservation> findByMember_EmailAndConcertMapping_ConcertMappingId(String email, Long concertMappingId);
+    @Query("SELECT r FROM Reservation r WHERE r.member.email = :email AND r.concertMapping.concertMappingId = :concertMappingId")
+    Optional<Reservation> findByMemberEmailAndConcertMappingId(@Param("email") String email, @Param("concertMappingId") Long concertMappingId);
+
+//    Optional<Reservation> findByMember_EmailAndConcertMapping_ConcertMappingId(String email, Long concertMappingId);
+    boolean existsByMemberEmailAndConcertMappingConcertMappingId(String email, Long concertMappingId);
+
 
     @EntityGraph(attributePaths = {"concertMapping", "member"})
     Optional<Reservation> findByConcertMapping_ConcertMappingIdAndMember_Email(@Param("concertMappingId") Long concertMappingId, @Param("email") String email);

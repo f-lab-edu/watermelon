@@ -49,6 +49,8 @@ dependencies {
 
     // kafka
     implementation 'org.apache.kafka:kafka-clients:3.4.0'
+    implementation 'org.springframework.kafka:spring-kafka:3.0.10'
+
     // redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 

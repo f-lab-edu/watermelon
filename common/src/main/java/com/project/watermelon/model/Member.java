@@ -12,6 +12,9 @@ import com.project.watermelon.util.Timestamped;
 @Getter
 @Setter
 @Entity
+@Table(name = "MEMBER", indexes = {
+        @Index(name = "idx_email", columnList = "email")
+})
 public class Member extends Timestamped {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
