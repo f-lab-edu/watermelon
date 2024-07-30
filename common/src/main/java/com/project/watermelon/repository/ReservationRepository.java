@@ -14,7 +14,7 @@ import java.util.Optional;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    Optional<Reservation> findByMember_Email(String email);
+    Optional<Reservation> findByMember_EmailAndConcertMapping_ConcertMappingId(String email, Long concertMappingId);
 
     @EntityGraph(attributePaths = {"concertMapping", "member"})
     Optional<Reservation> findByConcertMapping_ConcertMappingIdAndMember_Email(@Param("concertMappingId") Long concertMappingId, @Param("email") String email);
