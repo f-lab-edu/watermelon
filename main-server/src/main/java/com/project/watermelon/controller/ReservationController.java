@@ -3,9 +3,7 @@ package com.project.watermelon.controller;
 import com.project.watermelon.dto.CommonBackendResponseDto;
 import com.project.watermelon.dto.reservation.PostReservationMessageRequestDto;
 import com.project.watermelon.dto.reservation.ReservationIdResponseDto;
-import com.project.watermelon.dto.reservation.ReservationMessageResponseDto;
 import com.project.watermelon.dto.reservation.ReservationRankResponseDto;
-import com.project.watermelon.security.SecurityUtil;
 import com.project.watermelon.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -18,15 +16,14 @@ public class ReservationController {
 
     @PostMapping("/message")
     public CommonBackendResponseDto<String> produceReservationMessage(@RequestBody PostReservationMessageRequestDto requestDto) {
-        String email = requestDto.getEmail();
+//        String email = requestDto.getEmail();
 //        return reservationService.produceReservationMessage(email, requestDto.getConcertMappingId());
         return reservationService.produceReservationMessage(requestDto.getConcertMappingId());
     }
 
     @GetMapping("/id/{concertMappingId}")
     public ReservationIdResponseDto getReservationId(@PathVariable("concertMappingId") Long concertMappingId) {
-        String email = SecurityUtil.getCurrentMemberUsername();
-        return reservationService.retrieveReservationId(concertMappingId, email);
+        return reservationService.retrieveReservationId(concertMappingId);
     }
 
     @GetMapping("/rank/{concertMappingId}/{reservationId}")

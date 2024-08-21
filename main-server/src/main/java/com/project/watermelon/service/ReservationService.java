@@ -109,8 +109,9 @@ public class ReservationService {
         return isMemberExists;
     }
 
-    public ReservationIdResponseDto retrieveReservationId(Long concertMappingId, String email) {
-        Reservation reservation = reservationRepository.findByConcertMapping_ConcertMappingIdAndMember_Email(concertMappingId, email).orElseThrow(
+    public ReservationIdResponseDto retrieveReservationId(Long concertMappingId) {
+        String memberEmail = securityUtil.getCurrentMemberUsername();
+        Reservation reservation = reservationRepository.findByConcertMapping_ConcertMappingIdAndMember_Email(concertMappingId, memberEmail).orElseThrow(
                 () -> new InvalidIdException("Invalid concertMappingId.")
         );
         Long reservationId = reservation.getReservationId();
@@ -138,6 +139,7 @@ public class ReservationService {
         return new ReservationRankResponseDto(
                 reservationRankVo
         );
+    }
 
     private <T> ListenableFuture<T> toListenableFuture(CompletableFuture<T> completableFuture) {
         SettableListenableFuture<T> listenableFuture = new SettableListenableFuture<>();
