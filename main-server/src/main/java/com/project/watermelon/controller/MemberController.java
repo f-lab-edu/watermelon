@@ -33,8 +33,7 @@ public class MemberController {
 
     @GetMapping("/memberName")
     public ResponseEntity<String> retrieveMemberName() {
-        String email = SecurityUtil.getCurrentMemberUsername();
-        return ResponseEntity.ok(memberService.retrieveMemberName(email));
+        return ResponseEntity.ok(memberService.retrieveMemberName());
     }
 
 }

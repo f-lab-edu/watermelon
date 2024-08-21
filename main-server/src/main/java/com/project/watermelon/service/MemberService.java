@@ -9,6 +9,7 @@ import com.project.watermelon.model.Member;
 import com.project.watermelon.model.RefreshToken;
 import com.project.watermelon.repository.MemberRepository;
 import com.project.watermelon.repository.RefreshTokenRepository;
+import com.project.watermelon.security.SecurityUtil;
 import com.project.watermelon.security.UserDetailsImpl;
 import com.project.watermelon.security.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ public class MemberService {
     private final AuthenticationManager authenticationManager;
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserDetailsCacheService userDetailsCacheService;
+    private final SecurityUtil securityUtil;
 
     public MemberSignUpResponseDto signup(MemberSignUpRequestDto memberRequestDto) {
         if (memberRepository.existsByEmail(memberRequestDto.getEmail())) {
@@ -105,7 +107,8 @@ public class MemberService {
         }
     }
 
-    public String retrieveMemberName(String email) {
+    public String retrieveMemberName() {
+        String email = securityUtil.getCurrentMemberUsername();
         Member member = memberRepository.findByEmail(email).orElseThrow(
                 () -> new InvalidIdException("Invalid member email.")
         );
