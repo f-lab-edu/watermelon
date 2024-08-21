@@ -6,30 +6,27 @@ import com.project.watermelon.dto.reservation.ReservationIdResponseDto;
 import com.project.watermelon.dto.reservation.ReservationRankResponseDto;
 import com.project.watermelon.enumeration.ReservationStatus;
 import com.project.watermelon.exception.InvalidIdException;
-import com.project.watermelon.exception.MemberAlreadyRequestReservationException;
 import com.project.watermelon.model.Reservation;
 import com.project.watermelon.repository.ReservationRedisRepository;
 import com.project.watermelon.repository.ReservationRepository;
+import com.project.watermelon.security.SecurityUtil;
 import com.project.watermelon.vo.ReservationIdVo;
 import com.project.watermelon.vo.ReservationRankVo;
-import jakarta.annotation.PostConstruct;
-import com.project.watermelon.security.SecurityUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.SettableListenableFuture;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Service
 @RequiredArgsConstructor
@@ -60,16 +57,12 @@ public class ReservationService {
 
         try {
             ProducerRecord<String, String> record = transformMessageStringToJson(memberEmail, stringConcertMappingId);
-            CompletableFuture<SendResult<String, String>> completableFuture = kafkaTemplate.send(record);
-            ListenableFuture<SendResult<String, String>> listenableFuture = toListenableFuture(completableFuture);
+            SendResult<String, String> sendResult = kafkaTemplate.send(record).get(); // 동기 방식으로 Kafka 메시지를 전송
+            RecordMetadata metadata = sendResult.getRecordMetadata(); // RecordMetadata를 추출
 
-            listenableFuture.addCallback(result -> {
-                reservationRedisRepository.storeUserIdWithDefaultState(memberEmail, stringConcertMappingId);
-                log.info("Message sent to topic {} with offset {}", result.getRecordMetadata().topic(), result.getRecordMetadata().offset());
-            }, ex -> {
-                log.error("Failed to send message", ex);
-            });
-        } catch (Exception e) {
+            reservationRedisRepository.storeUserIdWithDefaultState(memberEmail, stringConcertMappingId);
+            log.info("Message sent to topic {} with offset {}", metadata.topic(), metadata.offset());
+        } catch (InterruptedException | ExecutionException e) {
             log.error("Exception while sending message", e);
             throw new RuntimeException("Exception occurred during message production", e);
         }
@@ -139,17 +132,5 @@ public class ReservationService {
         return new ReservationRankResponseDto(
                 reservationRankVo
         );
-    }
-
-    private <T> ListenableFuture<T> toListenableFuture(CompletableFuture<T> completableFuture) {
-        SettableListenableFuture<T> listenableFuture = new SettableListenableFuture<>();
-        completableFuture.whenComplete((result, ex) -> {
-            if (ex == null) {
-                listenableFuture.set(result);
-            } else {
-                listenableFuture.setException(ex);
-            }
-        });
-        return listenableFuture;
     }
 }
